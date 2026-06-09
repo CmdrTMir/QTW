@@ -33,18 +33,24 @@ class TabWithMode(ttk.Frame):
             self.N_spin.pack(side=tk.LEFT, padx=5)
             # t Parameter
             tk.Label(param_frame, text="t: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
-            self.t_var = tk.IntVar(value=2)
-            self.t_spin = tk.Spinbox(param_frame, from_=1, to=100, textvariable=self.t_var, font=("Arial", 12), width=5)
+            self.t_var = tk.DoubleVar(value=2.0)
+            self.t_spin = tk.Spinbox(param_frame, from_=0.0, to=50.0, increment=0.1, textvariable=self.t_var, font=("Arial", 12), width=8)
             self.t_spin.pack(side=tk.LEFT, padx=5)
             # gamma Parameter
             tk.Label(param_frame, text="γ: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
-            self.gamma_var = tk.IntVar(value=1)
-            self.gamma_spin = tk.Spinbox(param_frame, from_=0, to=100, textvariable=self.gamma_var, font=("Arial", 12), width=5)
+            self.gamma_var = tk.DoubleVar(value=1.0)
+            self.gamma_spin = tk.Spinbox(param_frame, from_=0.0, to=50.0, increment=0.1, textvariable=self.gamma_var, font=("Arial", 12), width=8)
             self.gamma_spin.pack(side=tk.LEFT, padx=5)
 
-        # Button zum Ausführen
-        self.run_button = tk.Button(self, text="Ausführen", font=("Arial", 11, "bold"), command=self.execute_script)
-        self.run_button.pack(pady=5)
+        # Buttons zum Ausführen
+        button_frame = tk.Frame(self)
+        button_frame.pack(pady=5)
+
+        self.run_button = tk.Button(button_frame, text="Ausführen", font=("Arial", 11, "bold"), command=self.execute_script)
+        self.run_button.pack(side=tk.LEFT, padx=5)
+
+        self.steady_button = tk.Button(button_frame, text="Steady State", font=("Arial", 11, "bold"), command=self.execute_steady_state)
+        self.steady_button.pack(side=tk.LEFT, padx=5)
 
         self.figure, self.ax = plt.subplots(figsize=(6,4))
         self.canvas = FigureCanvasTkAgg(self.figure, self)
@@ -75,7 +81,7 @@ class TabWithMode(ttk.Frame):
             gamma = self.gamma_var.get()
             if self.mode == "plot":
                 self.ax.clear()
-                self.script_func(self.ax, N, t, gamma)
+                self.script_func(self.ax, N, t, gamma, mode="time")
                 self.canvas.draw()
             else:
                 self.output_text.delete(1.0, tk.END)
@@ -88,6 +94,15 @@ class TabWithMode(ttk.Frame):
             else:
                 self.output_text.delete(1.0, tk.END)
                 self.script_func(self.write_to_output)
+
+    def execute_steady_state(self):
+        if self.params:
+            N = self.N_var.get()
+            t = self.t_var.get()
+            gamma = self.gamma_var.get()
+            self.ax.clear()
+            self.script_func(self.ax, N, t, gamma, mode="steady")
+            self.canvas.draw()
 
 # ------------------------------------------------------------
 def script1(ax):

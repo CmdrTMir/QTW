@@ -27,7 +27,10 @@ def fun_rho_dot(t, y, H, c, c_dag, gamma, N):
     return rho_dot.flatten()
 # ===============================================================================
 
-def lindblad(ax, N_val, t_val, gamma_val):
+# global variable
+ss_values = None
+
+def lindblad_time(ax, N_val, t_val, gamma_val, mode):
 # ---- Variablen ----
     sigma = qt.destroy(2)
     sig_dag = qt.create(2)
@@ -80,7 +83,7 @@ def lindblad(ax, N_val, t_val, gamma_val):
 
     # ---- Lindblad-Terme ----
     #dim = (2**N)**2
-    plot_len = 10
+    plot_len = int(max(10/gamma, 10/t))
     rho0 = qt.fock_dm([2]*N, [0]*N).full()
     t_span = (0, plot_len)
     t_eval = np.linspace(0, plot_len, plot_len*4)
@@ -96,22 +99,22 @@ def lindblad(ax, N_val, t_val, gamma_val):
         args=(H, c, c_dag, gamma, N)
     )
 
-    ew_0 = []
-    ew_n = []
+    ew_listen = []
 
-    for i in range(len(loesung.t)):
-        rho_i = loesung.y[:, i].reshape(2**N, 2**N)
-        wert_0 = np.trace(rho_i @ c_dag[0] @ c[0])
-        wert_n = np.trace(rho_i @ c_dag[-1] @ c[-1])
-        ew_0.append(wert_0)
-        ew_n.append(wert_n)
+    for site in range(N):
+        ew_site = []
+        for i in range(len(loesung.t)):
+            rho_i = loesung.y[:, i].reshape(2**N, 2**N)
+            wert = np.trace(rho_i @ c_dag[site] @ c[site])
+            ew_site.append(wert)
+        ew_listen.append(ew_site)
 
 
     end_solve = time.perf_counter()
 
     # Plot:
-    ax.plot(loesung.t, ew_0, "b-")
-    ax.plot(loesung.t, ew_n, "r--")
+    ax.plot(loesung.t, ew_listen[0], "b-")
+    ax.plot(loesung.t, ew_listen[-1], "r--")
     ax.grid(True)
     ax.set_ylim(0, 1.1)
     ax.set_xlim(0, plot_len+1)
@@ -121,6 +124,44 @@ def lindblad(ax, N_val, t_val, gamma_val):
     ax.set_title(f'Besetzungszahlen für N={N} Sites')
     ax.legend(['Site 1', 'Site N'])
     ax.text(6.1, 0.01, f'Solving took {(end_solve - start_solve):.4f} s')
+
+    steady_state = [ew_listen[site][-1] for site in range(N)]
+    ss_values = steady_state
+
+    if mode == "time":
+        return None
+    elif mode == "steady":
+        return steady_state
+
+
+
+
+
+
+def lindblad_ss(ax, N_val, t_val, gamma_val):
+    global ss_values
+    steady_values = []
+
+    if ss_values is not None:
+        steady_values = ss_values
+    else:
+        steady_values = lindblad_time(ax, N_val, t_val, gamma_val, "steady")
+
+    ax.clear()
+    ax.set_ylim(0, 1.1)
+    ax.bar(range(1, N_val+1), steady_values)
+    ax.set_xticks(range(1, N_val+1))
+    ax.set_xlabel("Site")
+    ax.set_ylabel("Besetzungszahl")
+    ax.set_title("Steady State")
+
+
+
+def lindblad(ax, N_val, t_val, gamma_val, mode):
+    if mode == "time":
+        lindblad_time(ax, N_val, t_val, gamma_val, mode)
+    elif mode == "steady":
+        lindblad_ss(ax, N_val, t_val, gamma_val)
 
 
 
