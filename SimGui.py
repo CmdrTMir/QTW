@@ -6,6 +6,7 @@ import numpy as np
 
 from SimNatrium import Natrium
 from SimLindblad import lindblad
+from SimLindbladT import T_lindblad
 from SimQutipLMEq import qutip_lindblad
 from SimAnalytical import analytical
 
@@ -41,6 +42,11 @@ class TabWithMode(ttk.Frame):
             self.gamma_var = tk.DoubleVar(value=1.0)
             self.gamma_spin = tk.Spinbox(param_frame, from_=0.0, to=50.0, increment=0.1, textvariable=self.gamma_var, font=("Arial", 12), width=8)
             self.gamma_spin.pack(side=tk.LEFT, padx=5)
+            # d Parameter
+            tk.Label(param_frame, text="d: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
+            self.d_var = tk.IntVar(value=1)
+            self.d_spin = tk.Spinbox(param_frame, from_=1, to=100, textvariable=self.d_var, font=("Arial", 12), width=5)
+            self.d_spin.pack(side=tk.LEFT, padx=5)
 
         # Buttons zum Ausführen
         button_frame = tk.Frame(self)
@@ -78,10 +84,11 @@ class TabWithMode(ttk.Frame):
         if self.params:
             N = self.N_var.get()
             t = self.t_var.get()
+            d = self.d_var.get()
             gamma = self.gamma_var.get()
             if self.mode == "plot":
                 self.ax.clear()
-                self.script_func(self.ax, N, t, gamma, mode="time")
+                self.script_func(self.ax, N, t, gamma, d, mode="time")
                 self.canvas.draw()
             else:
                 self.output_text.delete(1.0, tk.END)
@@ -99,9 +106,10 @@ class TabWithMode(ttk.Frame):
         if self.params:
             N = self.N_var.get()
             t = self.t_var.get()
+            d = self.d_var.get()
             gamma = self.gamma_var.get()
             self.ax.clear()
-            self.script_func(self.ax, N, t, gamma, mode="steady")
+            self.script_func(self.ax, N, t, gamma, d, mode="steady")
             self.canvas.draw()
 
 # ------------------------------------------------------------
@@ -125,6 +133,7 @@ class MainApp:
             ("Sinus", script1, "plot", False),
             ("Natrium", Natrium, "plot", False),
             ("Lindblad", lindblad, "plot", True),
+            ("variable T", T_lindblad, "plot", True),
             ("Qutip LMEq", qutip_lindblad, "text", True),
             ("Analytical", analytical, "plot", True)
         ]

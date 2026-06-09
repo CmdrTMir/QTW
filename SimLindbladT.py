@@ -30,7 +30,7 @@ def fun_rho_dot(t, y, H, c, c_dag, gamma, N):
 # global variable
 ss_values = None
 
-def lindblad_time(ax, N_val, t_val, gamma_val, mode):
+def lindblad_time(ax, N_val, t_val, gamma_val, d_val, mode):
 # ---- Variablen ----
     sigma = qt.destroy(2)
     sig_dag = qt.create(2)
@@ -61,10 +61,21 @@ def lindblad_time(ax, N_val, t_val, gamma_val, mode):
     for op in c:
         c_dag.append(op.dag())
 
+
+# create T matrix for more than nearest neighbour tunneling
+    d = d_val
+    T = np.zeros((N, N))
+    for j in range(N):
+        for jp in range(N):
+            if j != jp:
+                val = t / abs(j - jp)**d
+                T[j, jp] = round(val,2) if val > 1e-3 else 0.0
+
+# berechne H
     for j in range(N-1):
-        jp1 = (j + 1) % N
-        H += c_dag[j] * c[jp1] + c_dag[jp1] * c[j]
-    H = -t * H
+        for jp1 in range(j+1, N):
+            H += T[j,jp1] * (c_dag[j] * c[jp1] + c_dag[jp1] * c[j])
+    H = -H
 
     ### Um c's in np arrays umzuwandeln
     np_c = []
@@ -138,14 +149,14 @@ def lindblad_time(ax, N_val, t_val, gamma_val, mode):
 
 
 
-def lindblad_ss(ax, N_val, t_val, gamma_val):
+def lindblad_ss(ax, N_val, t_val, gamma_val, d_val):
     global ss_values
     steady_values = []
 
     if ss_values is not None:
         steady_values = ss_values
     else:
-        steady_values = lindblad_time(ax, N_val, t_val, gamma_val, "steady")
+        steady_values = lindblad_time(ax, N_val, t_val, gamma_val, d_val, "steady")
 
     ax.clear()
     ax.set_ylim(0, 1.1)
@@ -156,12 +167,12 @@ def lindblad_ss(ax, N_val, t_val, gamma_val):
     ax.set_title("Steady State")
 
 
-# ignoring d value here...
-def lindblad(ax, N_val, t_val, gamma_val, d, mode):
+
+def T_lindblad(ax, N_val, t_val, gamma_val, d_val, mode):
     if mode == "time":
-        lindblad_time(ax, N_val, t_val, gamma_val, mode)
+        lindblad_time(ax, N_val, t_val, gamma_val, d_val, mode)
     elif mode == "steady":
-        lindblad_ss(ax, N_val, t_val, gamma_val)
+        lindblad_ss(ax, N_val, t_val, gamma_val, d_val)
 
 
 

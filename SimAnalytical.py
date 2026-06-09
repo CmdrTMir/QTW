@@ -11,7 +11,8 @@ def fun_rho_dot(t, y, H, c, c_dag, gamma, N):
     rho_dot = kommutator + L_in + L_out
     return rho_dot.flatten()
 
-def analytical(ax, N_val, t_val, gamma_val):
+# ignoring d and mode here, not needed
+def analytical(ax, N_val, t_val, gamma_val, d, mode):
     # ---- Variablen ----
     sigma = qt.destroy(2)
     sig_dag = qt.create(2)
