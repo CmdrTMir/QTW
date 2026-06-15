@@ -8,55 +8,42 @@ import time
 
 from SimJWT import create_JWT_t
 
-# ===============================================================================
-# Hilfsfunktionen:
-#def inspect_operator(op, label):
-#    print("\n---[ %s ]---" % label)
-#    #print("Dims: %s" % str(op.dims))
-#    print("Shape: %s x %s" % (op.shape[0], op.shape[1]))
-#    print("Matrix:")
-#    real_part = np.real(op)
-#    print(real_part)
-#    print("-" * 80)
-
-def fun_rho_dot(t, y, H, c, c_dag, gamma, N):
+# ---- Lindblad-Terme ----
+def fun_rho_dot(t, y, H, c, c_dag, kappa, gamma, N):
     rho = y.reshape(2**N, 2**N)
     kommutator = -1j * (H @ rho - rho @ H)
-    L_in = gamma * (c_dag[0] @ rho @ c[0] - 1/2 * (c[0] @ c_dag[0] @ rho + rho @ c[0] @ c_dag[0]))
+    L_in = kappa * (c_dag[0] @ rho @ c[0] - 1/2 * (c[0] @ c_dag[0] @ rho + rho @ c[0] @ c_dag[0]))
     L_out = gamma * (c[-1] @ rho @ c_dag[-1] - 1/2 * (c_dag[-1] @ c[-1] @ rho + rho @ c_dag[-1] @ c[-1]))
 
     rho_dot = kommutator + L_in + L_out
     return rho_dot.flatten()
-# ===============================================================================
 
-# global variable
-ss_values = None
 
-def lindblad_time(ax, params):
+def single_excitation(ax, params):
 # ---- Variablen ----
     N = params.get("N", 2)
     t = params.get("t", 1.0)
     gamma = params.get("gamma", 1.0)
-    mode = params.get("mode", "time")
+    kappa = params.get("kappa", 4.0)
 
     c, c_dag, H = create_JWT_t(N, t)
 
-    # ---- Lindblad-Terme ----
+    # Anfangszustand (Grundzustand)
     #dim = (2**N)**2
-    plot_len = int(max(10/gamma, 10/t))
+    plot_len = int(max(5/gamma, 5/t))
     rho0 = qt.fock_dm([2]*N, [0]*N).full()
     t_span = (0, plot_len)
     t_eval = np.linspace(0, plot_len, plot_len*4)
 
     start_solve = time.perf_counter()
-
+    # Solver
     loesung = si.solve_ivp(
         fun=fun_rho_dot,
         t_span=t_span,
         y0=rho0.flatten(),
         method='DOP853',
         t_eval=t_eval,
-        args=(H, c, c_dag, gamma, N)
+        args=(H, c, c_dag, kappa, gamma, N)
     )
 
     ew_listen = []
@@ -84,62 +71,3 @@ def lindblad_time(ax, params):
     ax.set_title(f'Besetzungszahlen für N={N} Sites')
     ax.legend(['Site 1', 'Site N'])
     ax.text(6.1, 0.01, f'Solving took {(end_solve - start_solve):.4f} s')
-
-    steady_state = [ew_listen[site][-1] for site in range(N)]
-    ss_values = steady_state
-
-    if mode == "time":
-        return None
-    elif mode == "steady":
-        return steady_state
-
-
-
-
-
-def lindblad_ss(ax, params):
-    global ss_values
-    steady_values = []
-
-    if ss_values is not None:
-        steady_values = ss_values
-    else:
-        params["mode"] = "steady"
-        steady_values = lindblad_time(ax, params)
-
-    N = params.get("N", 2)
-    ax.clear()
-    ax.set_ylim(0, 1.1)
-    ax.bar(range(1, N+1), steady_values)
-    ax.set_xticks(range(1, N+1))
-    ax.set_xlabel("Site")
-    ax.set_ylabel("Besetzungszahl")
-    ax.set_title("Steady State")
-
-
-def lindblad(ax, params):
-    mode = params.get("mode", "time")
-    if mode == "time":
-        lindblad_time(ax, params)
-    elif mode == "steady":
-        lindblad_ss(ax, params)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

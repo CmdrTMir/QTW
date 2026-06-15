@@ -6,6 +6,8 @@ import scipy.integrate as si
 import qutip as qt
 import time
 
+from SimJWT import create_JWT_T
+
 # ===============================================================================
 # Hilfsfunktionen:
 #def inspect_operator(op, label):
@@ -30,67 +32,15 @@ def fun_rho_dot(t, y, H, c, c_dag, gamma, N):
 # global variable
 ss_values = None
 
-def lindblad_time(ax, N_val, t_val, gamma_val, d_val, mode):
+def lindblad_time(ax, params):
 # ---- Variablen ----
-    sigma = qt.destroy(2)
-    sig_dag = qt.create(2)
-    sigz = qt.sigmaz()
-    eye = qt.qeye(2)
+    N = params.get("N", 2)
+    t = params.get("t", 1.0)
+    gamma = params.get("gamma", 1.0)
+    d = params.get("d", 1)
+    mode = params.get("mode", "time")
 
-    N = N_val
-    t = t_val
-    gamma = gamma_val
-
-    H = 0
-    c = []
-    c_dag = []
-
-    # ---- berechne H ----
-    for j in range(N):
-        ops = []
-        for k in range(N):
-            if k < j:
-                ops.append(sigz)
-            elif k == j:
-                ops.append(sigma)
-            else:
-                ops.append(eye)
-        c_j = qt.tensor(ops)
-        c.append(c_j)
-
-    for op in c:
-        c_dag.append(op.dag())
-
-
-# create T matrix for more than nearest neighbour tunneling
-    d = d_val
-    T = np.zeros((N, N))
-    for j in range(N):
-        for jp in range(N):
-            if j != jp:
-                val = t / abs(j - jp)**d
-                T[j, jp] = round(val,2) if val > 1e-3 else 0.0
-
-# berechne H
-    for j in range(N-1):
-        for jp1 in range(j+1, N):
-            H += T[j,jp1] * (c_dag[j] * c[jp1] + c_dag[jp1] * c[j])
-    H = -H
-
-    ### Um c's in np arrays umzuwandeln
-    np_c = []
-    np_c_dag = []
-
-    for cop in c:
-        np_c.append(cop.full())
-
-    for cdop in c_dag:
-        np_c_dag.append(cdop.full())
-
-    c = np_c
-    c_dag = np_c_dag
-
-    H = H.full()
+    c, c_dag, H = create_JWT_T(N, t, d)
 
     # ---- Lindblad-Terme ----
     #dim = (2**N)**2
@@ -149,30 +99,33 @@ def lindblad_time(ax, N_val, t_val, gamma_val, d_val, mode):
 
 
 
-def lindblad_ss(ax, N_val, t_val, gamma_val, d_val):
+def lindblad_ss(ax, params):
     global ss_values
     steady_values = []
 
     if ss_values is not None:
         steady_values = ss_values
     else:
-        steady_values = lindblad_time(ax, N_val, t_val, gamma_val, d_val, "steady")
+        params["mode"] = "steady"
+        steady_values = lindblad_time(ax, params)
 
+    N = params.get("N", 2)
     ax.clear()
     ax.set_ylim(0, 1.1)
-    ax.bar(range(1, N_val+1), steady_values)
-    ax.set_xticks(range(1, N_val+1))
+    ax.bar(range(1, N+1), steady_values)
+    ax.set_xticks(range(1, N+1))
     ax.set_xlabel("Site")
     ax.set_ylabel("Besetzungszahl")
     ax.set_title("Steady State")
 
 
 
-def T_lindblad(ax, N_val, t_val, gamma_val, d_val, mode):
+def T_lindblad(ax, params):
+    mode = params.get("mode", "time")
     if mode == "time":
-        lindblad_time(ax, N_val, t_val, gamma_val, d_val, mode)
+        lindblad_time(ax, params)
     elif mode == "steady":
-        lindblad_ss(ax, N_val, t_val, gamma_val, d_val)
+        lindblad_ss(ax, params)
 
 
 

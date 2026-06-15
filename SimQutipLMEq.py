@@ -3,7 +3,7 @@ import qutip as qt
 from qutip.ui.progressbar import BaseProgressBar, TextProgressBar
 #from qutip import sigmax, sigmaz, destroy, qeye, mesolve, basis
 
-def qutip_lindblad(write_to_output, N_val, t_val, gamma_val):
+def qutip_lindblad(write_to_output, params):
 
     # Zeitunabhängige Operatoren
     sigma = qt.destroy(2)
@@ -12,9 +12,9 @@ def qutip_lindblad(write_to_output, N_val, t_val, gamma_val):
     eye = qt.qeye(2)
 
     # Parameter
-    N = N_val
-    t = t_val
-    gamma = gamma_val
+    N = params.get("N", 2)
+    t = params.get("t", 1.0)
+    gamma = params.get("gamma", 1.0)
 
     w = 1.0
     tlist = np.linspace(0, 1, 10)

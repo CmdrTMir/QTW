@@ -9,44 +9,56 @@ from SimLindblad import lindblad
 from SimLindbladT import T_lindblad
 from SimQutipLMEq import qutip_lindblad
 from SimAnalytical import analytical
+from SimSingleExcitation import single_excitation
 
 
 class TabWithMode(ttk.Frame):
-    def __init__(self, parent, tab_name, script_func, mode="plot", has_params=False):
+    def __init__(self, parent, tab_name, script_func, mode="plot", param_list=None):
         super().__init__(parent)
         self.script_func = script_func
         self.mode = mode
-        self.params = has_params
+        self.params = param_list
 
         # Beschreibungsbox oben
         self.desc = tk.Text(self, height=4, wrap=tk.WORD)
         self.desc.pack(fill=tk.X, padx=5, pady=5)
         self.desc.insert(tk.END, f"Tab: {tab_name} (Modus: {mode})")
 
-        if has_params:
+        if param_list:
             # Parameter-Frame
             param_frame = tk.Frame(self)#, bg="#FAF0E6") # Leder   bg="#FDF5E6" -- Altweiß
             param_frame.pack(fill=tk.X, padx=5, pady=5)
-            # N Parameter
-            tk.Label(param_frame, text="N: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
-            self.N_var = tk.IntVar(value=2)
-            self.N_spin = tk.Spinbox(param_frame, from_=1, to=100, textvariable=self.N_var, font=("Arial", 12), width=5)
-            self.N_spin.pack(side=tk.LEFT, padx=5)
-            # t Parameter
-            tk.Label(param_frame, text="t: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
-            self.t_var = tk.DoubleVar(value=2.0)
-            self.t_spin = tk.Spinbox(param_frame, from_=0.0, to=50.0, increment=0.1, textvariable=self.t_var, font=("Arial", 12), width=8)
-            self.t_spin.pack(side=tk.LEFT, padx=5)
-            # gamma Parameter
-            tk.Label(param_frame, text="γ: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
-            self.gamma_var = tk.DoubleVar(value=1.0)
-            self.gamma_spin = tk.Spinbox(param_frame, from_=0.0, to=50.0, increment=0.1, textvariable=self.gamma_var, font=("Arial", 12), width=8)
-            self.gamma_spin.pack(side=tk.LEFT, padx=5)
-            # d Parameter
-            tk.Label(param_frame, text="d: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
-            self.d_var = tk.IntVar(value=1)
-            self.d_spin = tk.Spinbox(param_frame, from_=1, to=100, textvariable=self.d_var, font=("Arial", 12), width=5)
-            self.d_spin.pack(side=tk.LEFT, padx=5)
+            if "N" in param_list: # N Parameter
+                tk.Label(param_frame, text="N: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
+                self.N_var = tk.IntVar(value=2)
+                self.N_spin = tk.Spinbox(param_frame, from_=1, to=100, textvariable=self.N_var, font=("Arial", 12), width=5)
+                self.N_spin.pack(side=tk.LEFT, padx=5)
+            if "t" in param_list: # t Parameter
+                tk.Label(param_frame, text="t: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
+                self.t_var = tk.DoubleVar(value=2.0)
+                self.t_spin = tk.Spinbox(param_frame, from_=0.0, to=50.0, increment=0.1, textvariable=self.t_var, font=("Arial", 12), width=8)
+                self.t_spin.pack(side=tk.LEFT, padx=5)
+            if "gamma" in param_list: # gamma Parameter
+                tk.Label(param_frame, text="γ: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
+                self.gamma_var = tk.DoubleVar(value=1.0)
+                self.gamma_spin = tk.Spinbox(param_frame, from_=0.0, to=50.0, increment=0.1, textvariable=self.gamma_var, font=("Arial", 12), width=8)
+                self.gamma_spin.pack(side=tk.LEFT, padx=5)
+            if "kappa" in param_list: # kappa Parameter
+                tk.Label(param_frame, text="κ: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
+                self.kappa_var = tk.DoubleVar(value=1.0)
+                self.kappa_spin = tk.Spinbox(param_frame, from_=0.0, to=50.0, increment=0.1, textvariable=self.kappa_var, font=("Arial", 12), width=8)
+                self.kappa_spin.pack(side=tk.LEFT, padx=5)
+            if "d" in param_list: # d Parameter
+                tk.Label(param_frame, text="d: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
+                self.d_var = tk.IntVar(value=1)
+                self.d_spin = tk.Spinbox(param_frame, from_=1, to=100, textvariable=self.d_var, font=("Arial", 12), width=5)
+                self.d_spin.pack(side=tk.LEFT, padx=5)
+            self.param_vars = {}
+            if hasattr(self, 'N_var'): self.param_vars['N'] = self.N_var
+            if hasattr(self, 't_var'): self.param_vars['t'] = self.t_var
+            if hasattr(self, 'gamma_var'): self.param_vars['gamma'] = self.gamma_var
+            if hasattr(self, 'kappa_var'): self.param_vars['kappa'] = self.kappa_var
+            if hasattr(self, 'd_var'): self.param_vars['d'] = self.d_var
 
         # Buttons zum Ausführen
         button_frame = tk.Frame(self)
@@ -81,18 +93,16 @@ class TabWithMode(ttk.Frame):
         self.output_text.see(tk.END)
 
     def execute_script(self):
-        if self.params:
-            N = self.N_var.get()
-            t = self.t_var.get()
-            d = self.d_var.get()
-            gamma = self.gamma_var.get()
+        if hasattr(self, 'param_vars'):
+            params = {name: var.get() for name, var in self.param_vars.items()}
+            params["mode"] = "time"
             if self.mode == "plot":
                 self.ax.clear()
-                self.script_func(self.ax, N, t, gamma, d, mode="time")
+                self.script_func(self.ax, params)
                 self.canvas.draw()
             else:
                 self.output_text.delete(1.0, tk.END)
-                self.script_func(self.write_to_output, N, t, gamma)
+                self.script_func(self.write_to_output, params)
         else:
             if self.mode == "plot":
                 self.ax.clear()
@@ -103,13 +113,11 @@ class TabWithMode(ttk.Frame):
                 self.script_func(self.write_to_output)
 
     def execute_steady_state(self):
-        if self.params:
-            N = self.N_var.get()
-            t = self.t_var.get()
-            d = self.d_var.get()
-            gamma = self.gamma_var.get()
+        if hasattr(self, 'param_vars'):
+            params = {name: var.get() for name, var in self.param_vars.items()}
+            params["mode"] = "steady"
             self.ax.clear()
-            self.script_func(self.ax, N, t, gamma, d, mode="steady")
+            self.script_func(self.ax, params)
             self.canvas.draw()
 
 # ------------------------------------------------------------
@@ -130,12 +138,13 @@ class MainApp:
 
         self.tabs = {}
         tab_configs = [
-            ("Sinus", script1, "plot", False),
-            ("Natrium", Natrium, "plot", False),
-            ("Lindblad", lindblad, "plot", True),
-            ("variable T", T_lindblad, "plot", True),
-            ("Qutip LMEq", qutip_lindblad, "text", True),
-            ("Analytical", analytical, "plot", True)
+            ("Sinus", script1, "plot", None),
+            ("Natrium", Natrium, "plot", None),
+            ("Lindblad", lindblad, "plot", ["N", "t", "gamma"]),
+            ("variable T", T_lindblad, "plot", ["N", "t", "gamma", "d"]),
+            ("Qutip LMEq", qutip_lindblad, "text", ["N", "t", "gamma"]),
+            ("Analytical", analytical, "plot", ["N", "t", "gamma"]),
+            ("SingleExcitation", single_excitation, "plot", ["N", "t", "gamma", "kappa"])
         ]
 
         for name, func, mode, has_params in tab_configs:
