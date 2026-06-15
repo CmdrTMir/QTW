@@ -66,7 +66,7 @@ def lindblad_time(ax, params):
         for i in range(len(loesung.t)):
             rho_i = loesung.y[:, i].reshape(2**N, 2**N)
             wert = np.trace(rho_i @ c_dag[site] @ c[site])
-            ew_site.append(wert)
+            ew_site.append(np.real(wert))
         ew_listen.append(ew_site)
 
 

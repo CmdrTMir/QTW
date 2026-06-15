@@ -136,21 +136,44 @@ class MainApp:
         self.notebook = ttk.Notebook(root)
         self.notebook.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
-        self.tabs = {}
-        tab_configs = [
-            ("Sinus", script1, "plot", None),
-            ("Natrium", Natrium, "plot", None),
-            ("Lindblad", lindblad, "plot", ["N", "t", "gamma"]),
-            ("variable T", T_lindblad, "plot", ["N", "t", "gamma", "d"]),
-            ("Qutip LMEq", qutip_lindblad, "text", ["N", "t", "gamma"]),
-            ("Analytical", analytical, "plot", ["N", "t", "gamma"]),
-            ("SingleExcitation", single_excitation, "plot", ["N", "t", "gamma", "kappa"])
-        ]
+        # === Gruppe 1: Full Dims ===
+        group1_frame = ttk.Frame(self.notebook)
+        self.notebook.add(group1_frame, text="Full Dims")
+        sub_notebook1 = ttk.Notebook(group1_frame)
+        sub_notebook1.pack(fill=tk.BOTH, expand=True)
 
-        for name, func, mode, has_params in tab_configs:
-            tab = TabWithMode(self.notebook, name, func, mode, has_params)
-            self.notebook.add(tab, text=name)
-            self.tabs[name] = tab
+        # Tabs in Gruppe 1
+        tab1 = TabWithMode(sub_notebook1, "Lindblad", lindblad, "plot", ["N", "t", "gamma"])
+        sub_notebook1.add(tab1, text="Lindblad")
+        tab2 = TabWithMode(sub_notebook1, "variable T", T_lindblad, "plot", ["N", "t", "gamma", "d"])
+        sub_notebook1.add(tab2, text="variable T")
+        tab4 = TabWithMode(sub_notebook1, "Analytical", analytical, "plot", ["N", "t", "gamma"])
+        sub_notebook1.add(tab4, text="Analytical")
+        tab6 = TabWithMode(sub_notebook1, "Qutip LMEq", qutip_lindblad, "text", ["N", "t", "gamma"])
+        sub_notebook1.add(tab6, text="Qutip LMEq")
+        tab7 = TabWithMode(sub_notebook1, "SingleExcitation", single_excitation, "plot", ["N", "t", "gamma", "kappa"])
+        sub_notebook1.add(tab7, text="SingleExcitation")
+
+        # === Gruppe 2: 2-BandModels ===
+        group2_frame = ttk.Frame(self.notebook)
+        self.notebook.add(group2_frame, text="2-BandModels")
+        sub_notebook2 = ttk.Notebook(group2_frame)
+        sub_notebook2.pack(fill=tk.BOTH, expand=True)
+
+        # Tabs in Gruppe 2
+        tab3 = TabWithMode(sub_notebook2, "Natrium", Natrium, "plot", None)
+        sub_notebook2.add(tab3, text="Natrium")
+
+        # === Gruppe 3: Tests ===
+        group3_frame = ttk.Frame(self.notebook)
+        self.notebook.add(group3_frame, text="Tests")
+        sub_notebook3 = ttk.Notebook(group3_frame)
+        sub_notebook3.pack(fill=tk.BOTH, expand=True)
+
+        tab5 = TabWithMode(sub_notebook3, "Sinus", script1, "plot", None)
+        sub_notebook3.add(tab5, text="Sinus")
+
+
 
 if __name__ == "__main__":
     root = tk.Tk()
