@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy import constants
+import scipy
 from scipy.linalg import eigh
 import scipy.integrate as si
 import qutip as qt
@@ -52,7 +52,7 @@ def create_JWT_t(N, t):
         np_c_dag.append(cdop.full())
     c = np_c
     c_dag = np_c_dag
-    H = H.full()
+    H = H.full() #.to("csr_matrix").data
 
     return c, c_dag, H
 
@@ -72,6 +72,14 @@ def create_JWT_T(N, t, d_val):
             if j != jp:
                 val = t / abs(j - jp)**d
                 T[j, jp] = round(val,2) if val > 1e-3 else 0.0
+    # indices = np.arange(N)
+    # distances = np.abs(indices[:, None] - indices)
+    # T_raw = t / (distances ** d)
+    # T_raw[distances == 0] = 0.0
+    # T = np.round(T_raw, 2)
+    # T[T < 1e-3] = 0.0
+    # print(T)
+
 
     # berechne H
     for j in range(N-1):
