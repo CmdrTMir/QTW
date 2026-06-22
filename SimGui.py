@@ -8,21 +8,20 @@ from SimNatrium import Natrium
 from SimLindblad import lindblad
 from SimLindbladT import T_lindblad
 from SimQutipLMEq import qutip_lindblad
-from SimAnalytical import analytical
+#from SimAnalytical import analytical
 from SimSingleExcitation import single_excitation
 
 
 class TabWithMode(ttk.Frame):
-    def __init__(self, parent, tab_name, script_func, mode="plot", param_list=None):
+    def __init__(self, parent, tab_name, script_func, param_list=None):
         super().__init__(parent)
         self.script_func = script_func
-        self.mode = mode
         self.params = param_list
 
         # Beschreibungsbox oben
         self.desc = tk.Text(self, height=4, wrap=tk.WORD)
         self.desc.pack(fill=tk.X, padx=5, pady=5)
-        self.desc.insert(tk.END, f"Tab: {tab_name} (Modus: {mode})")
+        self.desc.insert(tk.END, f"Tab: {tab_name}")
 
         if param_list:
             # Parameter-Frame
@@ -53,12 +52,18 @@ class TabWithMode(ttk.Frame):
                 self.d_var = tk.IntVar(value=1)
                 self.d_spin = tk.Spinbox(param_frame, from_=1, to=100, textvariable=self.d_var, font=("Arial", 12), width=5)
                 self.d_spin.pack(side=tk.LEFT, padx=5)
+            if "tf" in param_list: # tf Parameter
+                tk.Label(param_frame, text="tf: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
+                self.tf_var = tk.IntVar(value=100)
+                self.tf_spin = tk.Spinbox(param_frame, from_=50, to=1000, textvariable=self.tf_var, font=("Arial", 12), width=5)
+                self.tf_spin.pack(side=tk.LEFT, padx=5)
             self.param_vars = {}
             if hasattr(self, 'N_var'): self.param_vars['N'] = self.N_var
             if hasattr(self, 't_var'): self.param_vars['t'] = self.t_var
             if hasattr(self, 'gamma_var'): self.param_vars['gamma'] = self.gamma_var
             if hasattr(self, 'kappa_var'): self.param_vars['kappa'] = self.kappa_var
             if hasattr(self, 'd_var'): self.param_vars['d'] = self.d_var
+            if hasattr(self, 'tf_var'): self.param_vars['tf'] = self.tf_var
 
         # Buttons zum Ausführen
         button_frame = tk.Frame(self)
@@ -88,36 +93,30 @@ class TabWithMode(ttk.Frame):
         self.ax.axis('off')
         self.canvas.draw()
 
-    def write_to_output(self, message):
-        self.output_text.insert(tk.END, message + "\n")
+    def write_to_output(self, message, color="black"):
+        tag_name = f"color_{color}"  # z.B. "color_red", "color_black"
+        self.output_text.tag_config(tag_name, foreground=color)
+        self.output_text.insert(tk.END, message + "\n", tag_name)
         self.output_text.see(tk.END)
 
     def execute_script(self):
+        self.ax.clear()
+        self.output_text.delete(1.0, tk.END)
         if hasattr(self, 'param_vars'):
             params = {name: var.get() for name, var in self.param_vars.items()}
             params["mode"] = "time"
-            if self.mode == "plot":
-                self.ax.clear()
-                self.script_func(self.ax, params)
-                self.canvas.draw()
-            else:
-                self.output_text.delete(1.0, tk.END)
-                self.script_func(self.write_to_output, params)
+            self.script_func(self.ax, self.write_to_output, params)
         else:
-            if self.mode == "plot":
-                self.ax.clear()
-                self.script_func(self.ax)
-                self.canvas.draw()
-            else:
-                self.output_text.delete(1.0, tk.END)
-                self.script_func(self.write_to_output)
+            self.script_func(self.ax, self.write_to_output)
+        self.canvas.draw()
 
     def execute_steady_state(self):
         if hasattr(self, 'param_vars'):
             params = {name: var.get() for name, var in self.param_vars.items()}
             params["mode"] = "steady"
             self.ax.clear()
-            self.script_func(self.ax, params)
+            self.output_text.delete(1.0, tk.END)
+            self.script_func(self.ax, self.write_to_output, params)
             self.canvas.draw()
 
 # ------------------------------------------------------------
@@ -143,15 +142,15 @@ class MainApp:
         sub_notebook1.pack(fill=tk.BOTH, expand=True)
 
         # Tabs in Gruppe 1
-        tab1 = TabWithMode(sub_notebook1, "Lindblad", lindblad, "plot", ["N", "t", "gamma"])
+        tab1 = TabWithMode(sub_notebook1, "Lindblad", lindblad, ["N", "t", "gamma"])
         sub_notebook1.add(tab1, text="Lindblad")
-        tab2 = TabWithMode(sub_notebook1, "variable T", T_lindblad, "plot", ["N", "t", "gamma", "d"])
+        tab2 = TabWithMode(sub_notebook1, "variable T", T_lindblad, ["N", "t", "gamma", "d"])
         sub_notebook1.add(tab2, text="variable T")
-        tab4 = TabWithMode(sub_notebook1, "Analytical", analytical, "plot", ["N", "t", "gamma"])
-        sub_notebook1.add(tab4, text="Analytical")
-        tab6 = TabWithMode(sub_notebook1, "Qutip LMEq", qutip_lindblad, "text", ["N", "t", "gamma"])
+        #tab4 = TabWithMode(sub_notebook1, "Analytical", analytical, ["N", "t", "gamma"])
+        #sub_notebook1.add(tab4, text="Analytical")
+        tab6 = TabWithMode(sub_notebook1, "Qutip LMEq", qutip_lindblad, ["N", "t", "gamma"])
         sub_notebook1.add(tab6, text="Qutip LMEq")
-        tab7 = TabWithMode(sub_notebook1, "SingleExcitation", single_excitation, "plot", ["N", "t", "gamma", "kappa"])
+        tab7 = TabWithMode(sub_notebook1, "SingleExcitation", single_excitation, ["N", "t", "gamma", "kappa", "tf"])
         sub_notebook1.add(tab7, text="SingleExcitation")
 
         # === Gruppe 2: 2-BandModels ===
@@ -161,7 +160,7 @@ class MainApp:
         sub_notebook2.pack(fill=tk.BOTH, expand=True)
 
         # Tabs in Gruppe 2
-        tab3 = TabWithMode(sub_notebook2, "Natrium", Natrium, "plot", None)
+        tab3 = TabWithMode(sub_notebook2, "Natrium", Natrium, None)
         sub_notebook2.add(tab3, text="Natrium")
 
         # === Gruppe 3: Tests ===
@@ -170,7 +169,7 @@ class MainApp:
         sub_notebook3 = ttk.Notebook(group3_frame)
         sub_notebook3.pack(fill=tk.BOTH, expand=True)
 
-        tab5 = TabWithMode(sub_notebook3, "Sinus", script1, "plot", None)
+        tab5 = TabWithMode(sub_notebook3, "Sinus", script1, None)
         sub_notebook3.add(tab5, text="Sinus")
 
 

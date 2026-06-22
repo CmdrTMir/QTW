@@ -3,7 +3,7 @@ import qutip as qt
 from qutip.ui.progressbar import BaseProgressBar, TextProgressBar
 #from qutip import sigmax, sigmaz, destroy, qeye, mesolve, basis
 
-def qutip_lindblad(write_to_output, params):
+def qutip_lindblad(ax, write_to_output, params):
 
     # Zeitunabhängige Operatoren
     sigma = qt.destroy(2)

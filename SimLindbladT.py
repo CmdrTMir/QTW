@@ -32,7 +32,7 @@ def fun_rho_dot(t, y, H, c, c_dag, gamma, N):
 # global variable
 ss_values = None
 
-def lindblad_time(ax, params):
+def lindblad_time(ax, write_to_output, params):
 # ---- Variablen ----
     N = params.get("N", 2)
     t = params.get("t", 1.0)
@@ -99,7 +99,7 @@ def lindblad_time(ax, params):
 
 
 
-def lindblad_ss(ax, params):
+def lindblad_ss(ax, write_to_output, params):
     global ss_values
     steady_values = []
 
@@ -107,7 +107,7 @@ def lindblad_ss(ax, params):
         steady_values = ss_values
     else:
         params["mode"] = "steady"
-        steady_values = lindblad_time(ax, params)
+        steady_values = lindblad_time(ax, write_to_output, params)
 
     N = params.get("N", 2)
     ax.clear()
@@ -120,12 +120,12 @@ def lindblad_ss(ax, params):
 
 
 
-def T_lindblad(ax, params):
+def T_lindblad(ax, write_to_output, params):
     mode = params.get("mode", "time")
     if mode == "time":
-        lindblad_time(ax, params)
+        lindblad_time(ax, write_to_output, params)
     elif mode == "steady":
-        lindblad_ss(ax, params)
+        lindblad_ss(ax, write_to_output, params)
 
 
 

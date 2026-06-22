@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def Natrium(ax):
+def Natrium(ax, write_to_output):
     # ============================================================
     # PARAMETER für 1D-Natrium-Kette (Näherung)
     # ============================================================
