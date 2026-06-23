@@ -10,6 +10,7 @@ from SimLindbladT import T_lindblad
 from SimQutipLMEq import qutip_lindblad
 #from SimAnalytical import analytical
 from SimSingleExcitation import single_excitation
+from SimDimReduction import dim_reduction
 
 
 class TabWithMode(ttk.Frame):
@@ -94,7 +95,7 @@ class TabWithMode(ttk.Frame):
         self.canvas.draw()
 
     def write_to_output(self, message, color="black"):
-        tag_name = f"color_{color}"  # z.B. "color_red", "color_black"
+        tag_name = f"color_{color}"
         self.output_text.tag_config(tag_name, foreground=color)
         self.output_text.insert(tk.END, message + "\n", tag_name)
         self.output_text.see(tk.END)
@@ -171,6 +172,8 @@ class MainApp:
 
         tab5 = TabWithMode(sub_notebook3, "Sinus", script1, None)
         sub_notebook3.add(tab5, text="Sinus")
+        tab8 = TabWithMode(sub_notebook3, "DimReduction", dim_reduction, ["N", "t", "gamma", "kappa", "tf"])
+        sub_notebook3.add(tab8, text="DimReduction")
 
 
 
