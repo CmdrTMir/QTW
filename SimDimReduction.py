@@ -6,6 +6,8 @@ import scipy.integrate as si
 import qutip as qt
 import time
 
+# global variable
+ss_values = None
 
 # ---- Lindblad-Terme ----
 def fun_rho_dot(t, y, H, c, c_dag, kappa, gamma, N):
@@ -17,7 +19,7 @@ def fun_rho_dot(t, y, H, c, c_dag, kappa, gamma, N):
     rho_dot = kommutator + L_in + L_out
     return rho_dot.flatten()
 
-def dim_reduction(ax, write_to_output, params):
+def dim_reduction_time(ax, write_to_output, params):
     # ---- Variablen ----
     N = params.get("N", 2)
     t = params.get("t", 1.0)
@@ -191,6 +193,41 @@ def dim_reduction(ax, write_to_output, params):
     ax.set_title(f'Besetzungszahlen für N={N} Sites')
     ax.legend(['Site 1', 'Site N'])
 
+    steady_state = [ew_listen[site][-1] for site in range(1, N+1)]
+    global ss_values
+    ss_values = steady_state
+
+    if mode == "time":
+        return None
+    elif mode == "steady":
+        return steady_state
+
+
+def dim_reduction_ss(ax, write_to_output, params):
+    steady_values = []
+
+    if ss_values is not None:
+        steady_values = ss_values
+    else:
+        params["mode"] = "steady"
+        steady_values = dim_reduction_time(ax, write_to_output, params)
+
+    N = params.get("N", 2)
+    ax.clear()
+    ax.set_ylim(0, 1.1)
+    ax.bar(range(N), steady_values)
+    ax.set_xticks(range(0, N))
+    ax.set_xlabel("Site")
+    ax.set_ylabel("Besetzungszahl")
+    ax.set_title("Steady State")
+
+
+def dim_reduction(ax, write_to_output, params):
+    mode = params.get("mode", "time")
+    if mode == "time":
+        dim_reduction_time(ax, write_to_output, params)
+    elif mode == "steady":
+        dim_reduction_ss(ax, write_to_output, params)
 
 
 
