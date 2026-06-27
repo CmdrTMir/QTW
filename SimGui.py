@@ -39,12 +39,12 @@ class TabWithMode(ttk.Frame):
                 self.t_spin = tk.Spinbox(param_frame, from_=0.0, to=50.0, increment=0.1, textvariable=self.t_var, font=("Arial", 12), width=8)
                 self.t_spin.pack(side=tk.LEFT, padx=5)
             if "gamma" in param_list: # gamma Parameter
-                tk.Label(param_frame, text="γ: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
+                tk.Label(param_frame, text="γ (out): ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
                 self.gamma_var = tk.DoubleVar(value=1.0)
                 self.gamma_spin = tk.Spinbox(param_frame, from_=0.0, to=50.0, increment=0.1, textvariable=self.gamma_var, font=("Arial", 12), width=8)
                 self.gamma_spin.pack(side=tk.LEFT, padx=5)
             if "kappa" in param_list: # kappa Parameter
-                tk.Label(param_frame, text="κ: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
+                tk.Label(param_frame, text="κ (in): ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
                 self.kappa_var = tk.DoubleVar(value=1.0)
                 self.kappa_spin = tk.Spinbox(param_frame, from_=0.0, to=50.0, increment=0.1, textvariable=self.kappa_var, font=("Arial", 12), width=8)
                 self.kappa_spin.pack(side=tk.LEFT, padx=5)

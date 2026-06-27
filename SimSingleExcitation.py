@@ -47,15 +47,20 @@ def single_excitation_time(ax, write_to_output, params):
     n_N_theo = J / gamma
 
     ss_reached = False
+    ss_delta = False
 
-    eps = 1e-6
-    dt = 0.1
+    eps_delta = 1e-9
+    eps_diff = 1e-4
+    dt = 0.5
     t0 = 0
     t_all = []
 
     y = rho0.flatten()
     ew_listen = [[] for _ in range(N)]
 
+    count = 0
+    delta = [False] * 4
+    min_time = 100.0
     while t0 < tf:
         loesung = si.solve_ivp(
             fun=fun_rho_dot,
@@ -63,7 +68,9 @@ def single_excitation_time(ax, write_to_output, params):
             y0=y,
             method='DOP853',
             t_eval=np.linspace(t0, t0+dt, 10),
-            args=(H, c, c_dag, kappa, gamma, N)
+            args=(H, c, c_dag, kappa, gamma, N),
+            rtol=1e-5,
+            atol=1e-8
         )
 
         y = loesung.y[:, -1]
@@ -78,18 +85,50 @@ def single_excitation_time(ax, write_to_output, params):
         t_all.extend(loesung.t)
 
         current_n_1 = ew_listen[0][-1]
+        current_n_j = 0
         current_n_N = ew_listen[N-1][-1]
+
+        delta_1 = float('inf')
+        delta_N = float('inf')
+        delta_j = float('inf')
+        diff_j = float('inf')
+
+        if t0 > min_time:
+            last_n_1 = ew_listen[0][-2]
+            last_n_j = 0
+            last_n_N = ew_listen[N-1][-2]
+            delta_1 = abs(last_n_1 - current_n_1)
+            delta_N = abs(last_n_N - current_n_N)
+
         if N > 2:
             current_n_j = ew_listen[N//2][-1]
-        else:
-            current_n_j = 0.5
+            diff_j = abs(current_n_j - n_j_theo)
+            if t0 > min_time:
+                last_n_j = ew_listen[N//2][-2]
+                delta_j = abs(last_n_j - current_n_j)
+
+        if delta_j < eps_delta and delta_1 < eps_delta and delta_N < eps_delta and count < 5:
+            delta[count] = True
+            count += 1
 
         diff_1 = abs(current_n_1 - n_1_theo)
         diff_N = abs(current_n_N - n_N_theo)
-        diff_j = abs(current_n_j - n_j_theo)
 
-        if diff_1 < eps and diff_N < eps and diff_j < eps:
-            write_to_output(f"Steady State erreicht bei t={t0:.2f}")
+        if all(delta) == True:
+            write_to_output(f"Steady State erreicht als Delta bei t={t0:.2f}")
+            write_to_output(f"deltas remaining: eps={eps_delta}" + "\n"
+                        + f"delta_1: {delta_1:.10f}" + "\n"
+                        + f"delta_j: {delta_j:.10f}" + "\n"
+                        + f"delta_N: {delta_N:.10f}" + "\n")
+            write_to_output(f"Aktuelle Besetzungen weichen noch um" + "\n"
+                        + f"diff_1: {diff_1:.6f}" + "\n"
+                        + f"diff_j: {diff_j:.6f}" + "\n"
+                        + f"diff_N: {diff_N:.6f} ab." + "\n")
+            ss_delta = True
+            break
+
+        if diff_1 < eps_diff and diff_N < eps_diff and diff_j < eps_diff:
+            write_to_output(f"Steady State erreicht durch eps={eps_diff} bei t={t0:.2f}")
             ss_reached = True
             break
     ###############################################################
@@ -97,7 +136,7 @@ def single_excitation_time(ax, write_to_output, params):
 
     end_solve = time.perf_counter()
     write_to_output(f'Solving took {(end_solve - start_solve):.4f} s')
-    if not ss_reached:
+    if not ss_reached and not ss_delta:
         write_to_output(f"WARNUNG: tf={tf} erreicht, aber Steady State wurde nicht erreicht.", "#CD2626")
         write_to_output(f"Aktuelle Besetzungen weichen noch um" + "\n"
                         + f"diff_1: {diff_1:.6f}" + "\n"
