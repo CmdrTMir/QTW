@@ -11,6 +11,9 @@ from SimQutipLMEq import qutip_lindblad
 #from SimAnalytical import analytical
 from SimSingleExcitation import single_excitation
 from SimDimReduction import dim_reduction
+from SimKette2DPlot import chain_to_2D
+from Sim2D import dimRed_2D
+from Sim2DAni import ani_2D
 
 
 class TabWithMode(ttk.Frame):
@@ -170,10 +173,27 @@ class MainApp:
         sub_notebook3 = ttk.Notebook(group3_frame)
         sub_notebook3.pack(fill=tk.BOTH, expand=True)
 
+        # Tabs in Gruppe 3
         tab5 = TabWithMode(sub_notebook3, "Sinus", script1, None)
         sub_notebook3.add(tab5, text="Sinus")
-        tab8 = TabWithMode(sub_notebook3, "DimReduction", dim_reduction, ["N", "t", "gamma", "kappa", "tf"])
-        sub_notebook3.add(tab8, text="DimReduction")
+
+
+        # === Gruppe 4: (N+1)x(N+1) ===
+        group4_frame = ttk.Frame(self.notebook)
+        self.notebook.add(group4_frame, text="(N+1)x(N+1)")
+        sub_notebook4 = ttk.Notebook(group4_frame)
+        sub_notebook4.pack(fill=tk.BOTH, expand=True)
+
+        #Tabs in Gruppe 4
+        tab8 = TabWithMode(sub_notebook4, "DimReduction", dim_reduction, ["N", "t", "gamma", "kappa", "tf"])
+        sub_notebook4.add(tab8, text="DimReduction")
+        tab9 = TabWithMode(sub_notebook4, "Kette zu 2D", chain_to_2D, ["N", "t", "gamma", "kappa", "tf"])
+        sub_notebook4.add(tab9, text="Kette zu 2D")
+        tab10 = TabWithMode(sub_notebook4, "2D", dimRed_2D, ["N", "t", "gamma", "kappa", "tf"])
+        sub_notebook4.add(tab10, text="2D")
+        tab11 = TabWithMode(sub_notebook4, "2D Animation", ani_2D, ["N", "t", "gamma", "kappa", "tf"])
+        sub_notebook4.add(tab11, text="2D Animation")
+
 
 
 
