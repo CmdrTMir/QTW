@@ -79,7 +79,7 @@ def dim_reduction_time(ax, write_to_output, params):
     n_j_theo = (kappa * (gamma**2 + 4 * t**2)) / ((kappa + gamma)*(4 * t**2 + kappa * gamma))
     n_N_theo = J / gamma
 
-    tau = ((N + 1)**3) / (2 * math.pi * (kappa + gamma))
+    tau = ((N + 1)**3) / (2 * math.pi**2 * (kappa + gamma))
 
     write_to_output(f'tau: {tau:.2f}')
     if tau > tf:
