@@ -41,6 +41,11 @@ class TabWithMode(ttk.Frame):
                 self.t_var = tk.DoubleVar(value=2.0)
                 self.t_spin = tk.Spinbox(param_frame, from_=0.0, to=50.0, increment=0.1, textvariable=self.t_var, font=("Arial", 12), width=8)
                 self.t_spin.pack(side=tk.LEFT, padx=5)
+            if "t_v" in param_list: # vertical t Parameter
+                tk.Label(param_frame, text="t_v: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
+                self.t_v_var = tk.DoubleVar(value=2.0)
+                self.t_v_spin = tk.Spinbox(param_frame, from_=0.0, to=50.0, increment=0.1, textvariable=self.t_v_var, font=("Arial", 12), width=8)
+                self.t_v_spin.pack(side=tk.LEFT, padx=5)
             if "gamma" in param_list: # gamma Parameter
                 tk.Label(param_frame, text="γ (out): ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
                 self.gamma_var = tk.DoubleVar(value=1.0)
@@ -64,6 +69,7 @@ class TabWithMode(ttk.Frame):
             self.param_vars = {}
             if hasattr(self, 'N_var'): self.param_vars['N'] = self.N_var
             if hasattr(self, 't_var'): self.param_vars['t'] = self.t_var
+            if hasattr(self, 't_v_var'): self.param_vars['t_v'] = self.t_v_var
             if hasattr(self, 'gamma_var'): self.param_vars['gamma'] = self.gamma_var
             if hasattr(self, 'kappa_var'): self.param_vars['kappa'] = self.kappa_var
             if hasattr(self, 'd_var'): self.param_vars['d'] = self.d_var
@@ -185,11 +191,11 @@ class MainApp:
         sub_notebook4.pack(fill=tk.BOTH, expand=True)
 
         #Tabs in Gruppe 4
-        tab8 = TabWithMode(sub_notebook4, "DimReduction", dim_reduction, ["N", "t", "gamma", "kappa", "tf"])
+        tab8 = TabWithMode(sub_notebook4, "DimReduction", dim_reduction, ["N"])
         sub_notebook4.add(tab8, text="DimReduction")
-        tab9 = TabWithMode(sub_notebook4, "Kette zu 2D", chain_to_2D, ["N", "t", "gamma", "kappa", "tf"])
+        tab9 = TabWithMode(sub_notebook4, "Kette zu 2D", chain_to_2D, ["N"])
         sub_notebook4.add(tab9, text="Kette zu 2D")
-        tab10 = TabWithMode(sub_notebook4, "2D", dimRed_2D, ["N", "t", "gamma", "kappa", "tf"])
+        tab10 = TabWithMode(sub_notebook4, "2D", dimRed_2D, ["N", "t", "t_v", "tf"])
         sub_notebook4.add(tab10, text="2D")
         tab11 = TabWithMode(sub_notebook4, "2D Animation", ani_2D, ["N", "t", "gamma", "kappa", "tf"])
         sub_notebook4.add(tab11, text="2D Animation")

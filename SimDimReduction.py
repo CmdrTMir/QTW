@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 from scipy import constants
 from scipy.linalg import eigh
 import scipy.integrate as si
@@ -23,11 +24,12 @@ def fun_rho_dot(t, y, H, c, c_dag, kappa, gamma, N):
 def dim_reduction_time(ax, write_to_output, params):
     # ---- Variablen ----
     N = params.get("N", 2)
-    t = params.get("t", 1.0)
-    gamma = params.get("gamma", 1.0)
-    kappa = params.get("kappa", 4.0)
+    t = 0.5 #params.get("t", 1.0)
+    gamma = 0.1 #params.get("gamma", 1.0)
+    kappa = 0.001 #params.get("kappa", 4.0)
     mode = params.get("mode", "time")
-    tf = params.get("tf", 100)
+
+    write_to_output(f'The parameters are set to:    t: {t:.2f};  in: {kappa:.3f};  out: {gamma:.2f}')
 
     # New calculation for H and c's
     vecs = []
@@ -66,7 +68,6 @@ def dim_reduction_time(ax, write_to_output, params):
     c_dag.append(cN_dagger)
 
     # Anfangszustand (Grundzustand)
-    #plot_len = 1000 #int(max(10/kappa, 10/t))
     rho0 = np.zeros((N+1, N+1), dtype=complex)
     rho0[0, 0] = 1.0
 
@@ -80,10 +81,9 @@ def dim_reduction_time(ax, write_to_output, params):
     n_N_theo = J / gamma
 
     tau = ((N + 1)**3) / (2 * math.pi**2 * (kappa + gamma))
+    tf = 2 * tau
 
     write_to_output(f'tau: {tau:.2f}')
-    if tau > tf:
-        write_to_output(f"WARNUNG: tf={tf} < tau={tau:.2f}, steady state cannot be reliably reached", "#CD2626")
     write_to_output(f'n_1 analytischer Wert: {n_1_theo:.6f} ')
     write_to_output(f'n_j analytischer Wert: {n_j_theo:.6f} ')
     write_to_output(f'n_N analytischer Wert: {n_N_theo:.6f} ')
@@ -119,7 +119,7 @@ def dim_reduction_time(ax, write_to_output, params):
         for site in range(N+1):
             for i in range(len(loesung.t)):
                 rho_i = loesung.y[:, i].reshape(N+1, N+1)
-                wert = rho_i[site, site] #np.trace(rho_i @ c_dag[site] @ c[site])
+                wert = rho_i[site, site]
                 ew_listen[site].append(np.real(wert))
 
         t_all.extend(loesung.t)
@@ -178,21 +178,26 @@ def dim_reduction_time(ax, write_to_output, params):
 
 
     end_solve = time.perf_counter()
-    write_to_output(f'Solving took {(end_solve - start_solve):.4f} s')
+    write_to_output(f'Solving took {(end_solve - start_solve):.4f} s', "#228B22")
     if not ss_reached and not ss_delta:
         write_to_output(f"WARNUNG: tf={tf} erreicht, aber Steady State wurde nicht erreicht.", "#CD2626")
-        write_to_output(f"Aktuelle Besetzungen weichen numerisch noch um" + "\n"
+        write_to_output(f"Aktuelle Besetzungen weichen numerisch um" + "\n"
                         + f"diff_1: {diff_1:.6f}" + "\n"
                         + f"diff_j: {diff_j:.6f}" + "\n"
                         + f"diff_N: {diff_N:.6f}" + "\n"
                         + "von den analytischen Werten ab.", "#CD2626")
-        write_to_output("Erhöhen Sie 'tf' in den Parametern.")
 
     # Plot:
+    max_val = max(max(ew_listen[1]), max(ew_listen[-1]))
+    if max_val < 0.01:
+        y_max = 0.01
+    else:
+        y_max = max_val * 1.1
+
     ax.plot(t_all, ew_listen[1], "b-")
     ax.plot(t_all, ew_listen[-1], "r--")
     ax.grid(True)
-    ax.set_ylim(0, 1.1)
+    ax.set_ylim(0, y_max)
     ax.set_xlim(0, t_all[-1] + 1)
 
     ax.set_xlabel('Zeit')
@@ -219,13 +224,28 @@ def dim_reduction_ss(ax, write_to_output, params):
         params["mode"] = "steady"
         steady_values = dim_reduction_time(ax, write_to_output, params)
 
+
+
     N = params.get("N", 2)
     ax.clear()
-    ax.set_ylim(0, 1.1)
+    ax.set_yscale('log')
+    ax.set_ylim(1e-6, 1)
     ax.bar(range(N), steady_values)
     ax.set_xticks(range(0, N))
     ax.set_xlabel("Site")
     ax.set_ylabel("Besetzungszahl")
+    ax.set_title("Steady State")
+    bars = ax.bar(range(N), steady_values, color='#4682B4')
+    for i, bar in enumerate(bars):
+        height = steady_values[i]
+        if height > 0:
+            ax.text(bar.get_x() + bar.get_width()/2.,
+                    max(height, 1e-6),
+                    f'{height:.4f}',
+                    ha='center', va='bottom', fontsize=7)
+
+    ax.set_xticks(range(N))
+    ax.set_xlabel("Site")
     ax.set_title("Steady State")
 
 

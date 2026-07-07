@@ -21,18 +21,20 @@ def fun_rho_dot(t, y, H, c, c_dag, kappa, gamma, N):
 def dimRed_2D(ax, write_to_output, params):
     # ---- Variablen ----
     N = params.get("N", 9)
-    t_h = params.get("t", 1.0)
-    t_v = 2
-    gamma = params.get("gamma", 1.0)
-    kappa = params.get("kappa", 4.0)
+    t_h = params.get("t", 0.1)
+    t_v = params.get("t_v", 0.1)
+    gamma = 0.1 #params.get("gamma", 1.0)
+    kappa = 0.001 #params.get("kappa", 4.0)
     #mode = params.get("mode", "time")
     tf = params.get("tf", 100)
 
     # New calculation for H and c's
     if int(np.sqrt(N))**2 != N:
-        raise ValueError(f"N = {N} ist keine Quadratzahl. Es muss n^2 = N gelten.")
         write_to_output(f"FEHLER: N = {N} ist keine Quadratzahl. Es muss n^2 = N gelten.", "#CD2626")
+        raise ValueError(f"N = {N} ist keine Quadratzahl. Es muss n^2 = N gelten.")
     n = int(math.sqrt(N))
+
+    write_to_output(f'The parameters are set to:    in: {kappa:.3f};  out: {gamma:.2f}')
 
     vecs = []
     H = []
@@ -77,7 +79,7 @@ def dimRed_2D(ax, write_to_output, params):
     c_dag.append(c0_dagger)
     c_dag.append(cN_dagger)
 
-        # Anfangszustand (Grundzustand)
+    # Anfangszustand (Grundzustand)
     rho0 = np.zeros((N+1, N+1), dtype=complex)
     rho0[0, 0] = 1.0
 
@@ -85,7 +87,7 @@ def dimRed_2D(ax, write_to_output, params):
     # Solver
     ###############################################################
     #########
-    ######### Stimmt nicht mehr
+    ######### Stimmt nicht mehr ?????????????????
     #########
     ###############################################################
     #n_ss: kappa is IN
@@ -111,7 +113,6 @@ def dimRed_2D(ax, write_to_output, params):
     ew_listen = [[] for _ in range(N+1)]
 
     count = 0
-    delta = [False] * 4
     min_time = 100.0
     while t0 < tf:
         loesung = si.solve_ivp(
@@ -131,7 +132,7 @@ def dimRed_2D(ax, write_to_output, params):
         for site in range(N+1):
             for i in range(len(loesung.t)):
                 rho_i = loesung.y[:, i].reshape(N+1, N+1)
-                wert = rho_i[site, site] #np.trace(rho_i @ c_dag[site] @ c[site])
+                wert = rho_i[site, site]
                 ew_listen[site].append(np.real(wert))
 
         t_all.extend(loesung.t)
@@ -158,15 +159,18 @@ def dimRed_2D(ax, write_to_output, params):
             if t0 > min_time:
                 last_n_j = ew_listen[N//2][-2]
                 delta_j = abs(last_n_j - current_n_j)
+        #else:
+            #diff_j = 0.0
 
-        if delta_j < eps_delta and delta_1 < eps_delta and delta_N < eps_delta and count < 5:
-            delta[count] = True
+        if delta_j < eps_delta and delta_1 < eps_delta and delta_N < eps_delta:
             count += 1
+        else:
+            count = 0
 
          #diff_1 = abs(current_n_1 - n_1_theo)
          #diff_N = abs(current_n_N - n_N_theo)
 
-        if all(delta) == True:
+        if count == 5:
             write_to_output(f"Steady State erreicht als Delta bei t={t0:.2f}")
             write_to_output(f"deltas remaining: eps={eps_delta}" + "\n"
                         + f"delta_1: {delta_1:.10f}" + "\n"

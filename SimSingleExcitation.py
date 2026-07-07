@@ -5,6 +5,7 @@ from scipy.linalg import eigh
 import scipy.integrate as si
 import qutip as qt
 import time
+import math
 
 from SimJWT import create_JWT_t
 
@@ -34,7 +35,6 @@ def single_excitation_time(ax, write_to_output, params):
     c, c_dag, H = create_JWT_t(N, t)
 
     # Anfangszustand (Grundzustand)
-    plot_len = 1000 #int(max(10/kappa, 10/t))
     rho0 = qt.fock_dm([2]*N, [0]*N).full()
 
     start_solve = time.perf_counter()
@@ -46,10 +46,19 @@ def single_excitation_time(ax, write_to_output, params):
     n_j_theo = (kappa * (gamma**2 + 4 * t**2)) / ((kappa + gamma)*(4 * t**2 + kappa * gamma))
     n_N_theo = J / gamma
 
+    tau = ((N + 1)**3) / (2 * math.pi**2 * (kappa + gamma))
+
+    write_to_output(f'tau: {tau:.2f}')
+    if tau > tf:
+        write_to_output(f"WARNUNG: tf={tf} < tau={tau:.2f}, steady state cannot be reliably reached", "#CD2626")
+    write_to_output(f'n_1 analytischer Wert: {n_1_theo:.6f} ')
+    write_to_output(f'n_j analytischer Wert: {n_j_theo:.6f} ')
+    write_to_output(f'n_N analytischer Wert: {n_N_theo:.6f} ')
+
     ss_reached = False
     ss_delta = False
 
-    eps_delta = 1e-9
+    eps_delta = 1e-3
     eps_diff = 1e-4
     dt = 0.5
     t0 = 0
@@ -59,8 +68,6 @@ def single_excitation_time(ax, write_to_output, params):
     ew_listen = [[] for _ in range(N)]
 
     count = 0
-    delta = [False] * 4
-    min_time = 100.0
     while t0 < tf:
         loesung = si.solve_ivp(
             fun=fun_rho_dot,
@@ -93,28 +100,31 @@ def single_excitation_time(ax, write_to_output, params):
         delta_j = float('inf')
         diff_j = float('inf')
 
-        if t0 > min_time:
+        if t0 > tau:
             last_n_1 = ew_listen[0][-2]
             last_n_j = 0
             last_n_N = ew_listen[N-1][-2]
-            delta_1 = abs(last_n_1 - current_n_1)
-            delta_N = abs(last_n_N - current_n_N)
+            delta_1 = abs(last_n_1 - current_n_1) / max(abs(current_n_1), 1e-14)
+            delta_N = abs(last_n_N - current_n_N) / max(abs(current_n_N), 1e-14)
 
         if N > 2:
             current_n_j = ew_listen[N//2][-1]
             diff_j = abs(current_n_j - n_j_theo)
-            if t0 > min_time:
+            if t0 > tau:
                 last_n_j = ew_listen[N//2][-2]
-                delta_j = abs(last_n_j - current_n_j)
+                delta_j = abs(last_n_j - current_n_j) / max(abs(current_n_j), 1e-14)
+        else:
+            diff_j = 0.0
 
-        if delta_j < eps_delta and delta_1 < eps_delta and delta_N < eps_delta and count < 5:
-            delta[count] = True
+        if delta_j < eps_delta and delta_1 < eps_delta and delta_N < eps_delta:
             count += 1
+        else:
+            count = 0
 
         diff_1 = abs(current_n_1 - n_1_theo)
         diff_N = abs(current_n_N - n_N_theo)
 
-        if all(delta) == True:
+        if count == 5:
             write_to_output(f"Steady State erreicht als Delta bei t={t0:.2f}")
             write_to_output(f"deltas remaining: eps={eps_delta}" + "\n"
                         + f"delta_1: {delta_1:.10f}" + "\n"
@@ -135,7 +145,7 @@ def single_excitation_time(ax, write_to_output, params):
 
 
     end_solve = time.perf_counter()
-    write_to_output(f'Solving took {(end_solve - start_solve):.4f} s')
+    write_to_output(f'Solving took {(end_solve - start_solve):.4f} s', "#228B22")
     if not ss_reached and not ss_delta:
         write_to_output(f"WARNUNG: tf={tf} erreicht, aber Steady State wurde nicht erreicht.", "#CD2626")
         write_to_output(f"Aktuelle Besetzungen weichen noch um" + "\n"
@@ -156,7 +166,6 @@ def single_excitation_time(ax, write_to_output, params):
     ax.set_ylabel(r'$\langle n_j \rangle$')
     ax.set_title(f'Besetzungszahlen für N={N} Sites')
     ax.legend(['Site 1', 'Site N'])
-    #ax.text(6.1, 0.01, f'Solving took {(end_solve - start_solve):.4f} s')
 
     steady_state = [ew_listen[site][-1] for site in range(N)]
     global ss_values
