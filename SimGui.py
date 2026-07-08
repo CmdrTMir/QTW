@@ -14,13 +14,15 @@ from SimDimReduction import dim_reduction
 from SimKette2DPlot import chain_to_2D
 from Sim2D import dimRed_2D
 from Sim2DAni import ani_2D
+from SimEigenvals2D import eigenvals_2D
 
 
 class TabWithMode(ttk.Frame):
-    def __init__(self, parent, tab_name, script_func, param_list=None):
+    def __init__(self, parent, tab_name, script_func, param_list=None, n_axes=1):
         super().__init__(parent)
         self.script_func = script_func
         self.params = param_list
+        self.n_axes = n_axes
 
         # Beschreibungsbox oben
         self.desc = tk.Text(self, height=4, wrap=tk.WORD)
@@ -78,14 +80,16 @@ class TabWithMode(ttk.Frame):
         # Buttons zum Ausführen
         button_frame = tk.Frame(self)
         button_frame.pack(pady=5)
-
         self.run_button = tk.Button(button_frame, text="Ausführen", font=("Arial", 11, "bold"), command=self.execute_script)
         self.run_button.pack(side=tk.LEFT, padx=5)
-
         self.steady_button = tk.Button(button_frame, text="Steady State", font=("Arial", 11, "bold"), command=self.execute_steady_state)
         self.steady_button.pack(side=tk.LEFT, padx=5)
 
-        self.figure, self.ax = plt.subplots(figsize=(6,4))
+        if n_axes == 2:
+            self.figure, (self.ax1, self.ax2) = plt.subplots(1, 2, figsize=(6, 4))
+            self.ax = self.ax1
+        else:
+            self.figure, self.ax = plt.subplots(figsize=(6, 4))
         self.canvas = FigureCanvasTkAgg(self.figure, self)
         self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
@@ -96,11 +100,16 @@ class TabWithMode(ttk.Frame):
 
     def show_empty_plot(self):
         self.ax.clear()
+        if self.n_axes == 2:
+            self.ax2.clear()
+            self.ax.text(0.5, 0.5, "Noch nichts ausgeführt\nKlicken Sie auf 'Ausführen'",
+                        ha='center', va='center', fontsize=12, alpha=0.5)
+            self.ax.set_xlim(0,1); self.ax.set_ylim(0,1); self.ax.axis('off')
+            self.ax2.set_xlim(0,1); self.ax2.set_ylim(0,1); self.ax2.axis('off')
+
         self.ax.text(0.5, 0.5, "Noch nichts ausgeführt\nKlicken Sie auf 'Ausführen'",
-                     ha='center', va='center', fontsize=12, alpha=0.5)
-        self.ax.set_xlim(0, 1)
-        self.ax.set_ylim(0, 1)
-        self.ax.axis('off')
+                        ha='center', va='center', fontsize=12, alpha=0.5)
+        self.ax.set_xlim(0,1); self.ax.set_ylim(0,1); self.ax.axis('off')
         self.canvas.draw()
 
     def write_to_output(self, message, color="black"):
@@ -110,12 +119,17 @@ class TabWithMode(ttk.Frame):
         self.output_text.see(tk.END)
 
     def execute_script(self):
+        if self.n_axes == 2:
+            self.ax2.clear()
         self.ax.clear()
         self.output_text.delete(1.0, tk.END)
         if hasattr(self, 'param_vars'):
             params = {name: var.get() for name, var in self.param_vars.items()}
             params["mode"] = "time"
-            self.script_func(self.ax, self.write_to_output, params)
+            if self.n_axes == 2:
+                self.script_func(self.ax, self.ax2, self.write_to_output, params)
+            else:
+                self.script_func(self.ax, self.write_to_output, params)
         else:
             self.script_func(self.ax, self.write_to_output)
         self.canvas.draw()
@@ -197,8 +211,10 @@ class MainApp:
         sub_notebook4.add(tab9, text="Kette zu 2D")
         tab10 = TabWithMode(sub_notebook4, "2D", dimRed_2D, ["N", "t", "t_v", "tf"])
         sub_notebook4.add(tab10, text="2D")
-        tab11 = TabWithMode(sub_notebook4, "2D Animation", ani_2D, ["N", "t", "gamma", "kappa", "tf"])
-        sub_notebook4.add(tab11, text="2D Animation")
+        tab12 = TabWithMode(sub_notebook4, "eigenvals_2D", eigenvals_2D, ["N", "t", "t_v"], 2)
+        sub_notebook4.add(tab12, text="eigenvals_2D")
+        #tab11 = TabWithMode(sub_notebook4, "2D Animation", ani_2D, ["N", "t", "gamma", "kappa", "tf"])
+        #sub_notebook4.add(tab11, text="2D Animation")
 
 
 
