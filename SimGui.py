@@ -15,6 +15,7 @@ from SimKette2DPlot import chain_to_2D
 from Sim2D import dimRed_2D
 from Sim2DAni import ani_2D
 from SimEigenvals2D import eigenvals_2D
+from Sim1D2band import twoband_1D
 
 
 class TabWithMode(ttk.Frame):
@@ -68,6 +69,32 @@ class TabWithMode(ttk.Frame):
                 self.tf_var = tk.IntVar(value=100)
                 self.tf_spin = tk.Spinbox(param_frame, from_=50, to=1000, textvariable=self.tf_var, font=("Arial", 12), width=5)
                 self.tf_spin.pack(side=tk.LEFT, padx=5)
+            # Params for 2band model:
+            if "t_ss" in param_list:
+                tk.Label(param_frame, text="t_ss: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
+                self.tss_var = tk.DoubleVar(value=1.0)
+                self.tss_spin = tk.Spinbox(param_frame, from_=0.0, to=50.0, increment=0.1, textvariable=self.tss_var, font=("Arial", 12), width=8)
+                self.tss_spin.pack(side=tk.LEFT, padx=5)
+            if "t_pp" in param_list:
+                tk.Label(param_frame, text="t_pp: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
+                self.tpp_var = tk.DoubleVar(value=0.5)
+                self.tpp_spin = tk.Spinbox(param_frame, from_=0.0, to=50.0, increment=0.1, textvariable=self.tpp_var, font=("Arial", 12), width=8)
+                self.tpp_spin.pack(side=tk.LEFT, padx=5)
+            if "t_sp" in param_list:
+                tk.Label(param_frame, text="t_sp: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
+                self.tsp_var = tk.DoubleVar(value=0.0)
+                self.tsp_spin = tk.Spinbox(param_frame, from_=0.0, to=50.0, increment=0.1, textvariable=self.tsp_var, font=("Arial", 12), width=8)
+                self.tsp_spin.pack(side=tk.LEFT, padx=5)
+            if "e_s" in param_list:
+                tk.Label(param_frame, text="ε_s: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
+                self.es_var = tk.DoubleVar(value=0.0)
+                self.es_spin = tk.Spinbox(param_frame, from_=0.0, to=50.0, increment=0.1, textvariable=self.es_var, font=("Arial", 12), width=8)
+                self.es_spin.pack(side=tk.LEFT, padx=5)
+            if "e_p" in param_list:
+                tk.Label(param_frame, text="ε_p: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
+                self.ep_var = tk.DoubleVar(value=2.0)
+                self.ep_spin = tk.Spinbox(param_frame, from_=0.0, to=50.0, increment=0.1, textvariable=self.ep_var, font=("Arial", 12), width=8)
+                self.ep_spin.pack(side=tk.LEFT, padx=5)
             self.param_vars = {}
             if hasattr(self, 'N_var'): self.param_vars['N'] = self.N_var
             if hasattr(self, 't_var'): self.param_vars['t'] = self.t_var
@@ -76,6 +103,11 @@ class TabWithMode(ttk.Frame):
             if hasattr(self, 'kappa_var'): self.param_vars['kappa'] = self.kappa_var
             if hasattr(self, 'd_var'): self.param_vars['d'] = self.d_var
             if hasattr(self, 'tf_var'): self.param_vars['tf'] = self.tf_var
+            if hasattr(self, 'tss_var'): self.param_vars['t_ss'] = self.tss_var
+            if hasattr(self, 'tpp_var'): self.param_vars['t_pp'] = self.tpp_var
+            if hasattr(self, 'tsp_var'): self.param_vars['t_sp'] = self.tsp_var
+            if hasattr(self, 'es_var'): self.param_vars['e_s'] = self.es_var
+            if hasattr(self, 'ep_var'): self.param_vars['e_p'] = self.ep_var
 
         # Buttons zum Ausführen
         button_frame = tk.Frame(self)
@@ -186,6 +218,8 @@ class MainApp:
         # Tabs in Gruppe 2
         tab3 = TabWithMode(sub_notebook2, "Natrium", Natrium, None)
         sub_notebook2.add(tab3, text="Natrium")
+        tab3a = TabWithMode(sub_notebook2, "1D2band", twoband_1D, ["t_ss", "t_pp", "t_sp", "e_s", "e_p"])
+        sub_notebook2.add(tab3a, text="1D2band")
 
         # === Gruppe 3: Tests ===
         group3_frame = ttk.Frame(self.notebook)
