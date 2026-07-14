@@ -39,16 +39,21 @@ class TabWithMode(ttk.Frame):
                 self.N_var = tk.IntVar(value=2)
                 self.N_spin = tk.Spinbox(param_frame, from_=1, to=100, textvariable=self.N_var, font=("Arial", 12), width=5)
                 self.N_spin.pack(side=tk.LEFT, padx=5)
-            if "t" in param_list: # t Parameter
+            if "t" in param_list: # t Parameter (horizontal)
                 tk.Label(param_frame, text="t: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
                 self.t_var = tk.DoubleVar(value=2.0)
                 self.t_spin = tk.Spinbox(param_frame, from_=0.0, to=50.0, increment=0.1, textvariable=self.t_var, font=("Arial", 12), width=8)
                 self.t_spin.pack(side=tk.LEFT, padx=5)
             if "t_v" in param_list: # vertical t Parameter
                 tk.Label(param_frame, text="t_v: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
-                self.t_v_var = tk.DoubleVar(value=2.0)
+                self.t_v_var = tk.DoubleVar(value=1.0)
                 self.t_v_spin = tk.Spinbox(param_frame, from_=0.0, to=50.0, increment=0.1, textvariable=self.t_v_var, font=("Arial", 12), width=8)
                 self.t_v_spin.pack(side=tk.LEFT, padx=5)
+            if "t_d" in param_list: # diagonal t Parameter
+                tk.Label(param_frame, text="t_d: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
+                self.t_d_var = tk.DoubleVar(value=0)
+                self.t_d_spin = tk.Spinbox(param_frame, from_=0.0, to=50.0, increment=0.1, textvariable=self.t_d_var, font=("Arial", 12), width=8)
+                self.t_d_spin.pack(side=tk.LEFT, padx=5)
             if "gamma" in param_list: # gamma Parameter
                 tk.Label(param_frame, text="γ (out): ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
                 self.gamma_var = tk.DoubleVar(value=1.0)
@@ -99,6 +104,7 @@ class TabWithMode(ttk.Frame):
             if hasattr(self, 'N_var'): self.param_vars['N'] = self.N_var
             if hasattr(self, 't_var'): self.param_vars['t'] = self.t_var
             if hasattr(self, 't_v_var'): self.param_vars['t_v'] = self.t_v_var
+            if hasattr(self, 't_d_var'): self.param_vars['t_d'] = self.t_d_var
             if hasattr(self, 'gamma_var'): self.param_vars['gamma'] = self.gamma_var
             if hasattr(self, 'kappa_var'): self.param_vars['kappa'] = self.kappa_var
             if hasattr(self, 'd_var'): self.param_vars['d'] = self.d_var
@@ -202,8 +208,6 @@ class MainApp:
         sub_notebook1.add(tab1, text="Lindblad")
         tab2 = TabWithMode(sub_notebook1, "variable T", T_lindblad, ["N", "t", "gamma", "d"])
         sub_notebook1.add(tab2, text="variable T")
-        #tab4 = TabWithMode(sub_notebook1, "Analytical", analytical, ["N", "t", "gamma"])
-        #sub_notebook1.add(tab4, text="Analytical")
         tab6 = TabWithMode(sub_notebook1, "Qutip LMEq", qutip_lindblad, ["N", "t", "gamma"])
         sub_notebook1.add(tab6, text="Qutip LMEq")
         tab7 = TabWithMode(sub_notebook1, "SingleExcitation", single_excitation, ["N", "t", "gamma", "kappa", "tf"])
@@ -245,7 +249,7 @@ class MainApp:
         sub_notebook4.add(tab9, text="Kette zu 2D")
         tab10 = TabWithMode(sub_notebook4, "2D", dimRed_2D, ["N", "t", "t_v", "tf"])
         sub_notebook4.add(tab10, text="2D")
-        tab12 = TabWithMode(sub_notebook4, "eigenvals_2D", eigenvals_2D, ["N", "t", "t_v"], 2)
+        tab12 = TabWithMode(sub_notebook4, "eigenvals_2D", eigenvals_2D, ["N", "t", "t_v", "t_d"], 2) # <- 2 plots
         sub_notebook4.add(tab12, text="eigenvals_2D")
         #tab11 = TabWithMode(sub_notebook4, "2D Animation", ani_2D, ["N", "t", "gamma", "kappa", "tf"])
         #sub_notebook4.add(tab11, text="2D Animation")

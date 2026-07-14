@@ -23,6 +23,7 @@ def eigenvals_2D(ax1, ax2, write_to_output, params):
     N = params.get("N", 9)
     t_h = params.get("t", 0.1)
     t_v = params.get("t_v", 0.1)
+    t_d = params.get("t_d", 0.0)
     gamma = 0.1 #params.get("gamma", 1.0)
     kappa = 0.001 #params.get("kappa", 4.0)
 
@@ -58,6 +59,15 @@ def eigenvals_2D(ax1, ax2, write_to_output, params):
                 col += -t_v * vecs[j+n]
             if j-n > 0:
                 col += -t_v * vecs[j-n]
+            # diagonal tunneling (in both directions)
+            if (j-1) % n != 0 and j-n > 0:
+                col += -t_d * vecs[(j-n)-1]
+            if (j-1) % n != 0 and j+n <= N:
+                col += -t_d * vecs[(j+n)-1]
+            if j % n != 0 and j-n > 0:
+                col += -t_d * vecs[(j-n)+1]
+            if j % n != 0 and j+n <= N:
+                col += -t_d * vecs[(j+n)+1]
         H.append(col)
 
     H = np.array(H)
@@ -70,7 +80,9 @@ def eigenvals_2D(ax1, ax2, write_to_output, params):
     eig_ana = [0.0]
     for p in range(1, n + 1):
         for q in range(1, n + 1):
-            E = -2 * t_h * np.cos(np.pi * p / (n + 1)) - 2 * t_v * np.cos(np.pi * q / (n + 1))
+            kp = np.pi * p / (n + 1)
+            kq = np.pi * q / (n + 1)
+            E = -2 * t_h * np.cos(kp) - 2 * t_v * np.cos(kq) - 4 * t_d * np.cos(kp) * np.cos(kq)
             eig_ana.append(E)
     eig_ana_sorted = np.sort(eig_ana)
 
@@ -78,29 +90,28 @@ def eigenvals_2D(ax1, ax2, write_to_output, params):
     indices = np.arange(len(eig_num_sorted))
 
     # ax1: Numerisch
-    ax1.scatter(indices, eig_num_sorted, s=20, color='blue', label='Numerisch (H)')
+    ax1.scatter(indices, eig_num_sorted, s=20, color='blue')
     ax1.set_xlabel('Index (sortiert)')
     ax1.set_ylabel('Energie')
     ax1.set_title('Numerische Eigenwerte')
     ax1.grid(True, alpha=0.3)
-    ax1.legend()
 
     # ax2: Analytisch
-    ax2.scatter(indices, eig_ana_sorted, s=20, marker='x', color='red', label='Analytisch (Sinus)')
+    ax2.scatter(indices, eig_ana_sorted, s=20, marker='x', color='red')
     ax2.set_xlabel('Index (sortiert)')
     ax2.set_ylabel('Energie')
     ax2.set_title('Analytische Eigenwerte')
     ax2.grid(True, alpha=0.3)
-    ax2.legend()
 
     # ========== Differenz als Text ausgeben ==========
+    write_to_output("Blau = numerisch \t rot = analytisch")
     diff = eig_num_sorted - eig_ana_sorted
-    write_to_output("Differenz (Numerisch - Analytisch) für jeden Index:")
-    for i, d in enumerate(diff):
-        write_to_output(f"Index {i:3d}: {d:.2e}")
+    # write_to_output("Differenz (Numerisch - Analytisch) für jeden Index:")
+    # for i, d in enumerate(diff):
+    #     write_to_output(f"Index {i:3d}: {d:.2e}")
     # Zusätzlich max. Abweichung
     max_diff = np.max(np.abs(diff))
-    write_to_output(f"\nMaximale absolute Abweichung: {max_diff:.2e}")
+    write_to_output(f"Maximale absolute Abweichung: {max_diff:.2e}")
 
 
 
