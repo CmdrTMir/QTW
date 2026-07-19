@@ -22,6 +22,7 @@ def twoband_1D(ax, write_to_output, params):
 
     ew_oben = []
     ew_unten = []
+    bandlücke_k = []
     #####
     ##### # plus = nach unten offene Parabel
     ##### # minus = nach oben offene Parabel
@@ -37,20 +38,35 @@ def twoband_1D(ax, write_to_output, params):
         E = np.linalg.eigvalsh(H_k)
         ew_unten.append(E[0])
         ew_oben.append(E[1])
+        bandlücke_k.append(E[1] - E[0])
 
+    alle_energien = np.concatenate([ew_oben, ew_unten])
+    E_Fermi = np.median(alle_energien)
+    bandlücke_min = np.min(np.array(ew_oben) - np.array(ew_unten))
+    idx_min = np.argmin(bandlücke_k)
+    k_min = k_werte[idx_min]
 
 
     # Plotten der beiden Bänder
     ax.plot(k_werte, ew_oben, label='oberes Band (p)', color='red')
     ax.plot(k_werte, ew_unten, label='unteres Band (s)', color='blue')
+    ax.axhline(y=E_Fermi, color='green', linestyle='--', linewidth=1.2)
     ax.axhline(y=0.0, color='gray', linestyle='-', linewidth=1.0)
     ax.axvline(x=0.0, color='gray', linestyle='-', linewidth=1.0)
-    ax.axhline(y=e_s, color='orange', linestyle='-', linewidth=0.8, alpha=0.7)
-    ax.axhline(y=e_p, color='orange', linestyle='-', linewidth=0.8, alpha=0.7)
+    ax.axhline(y=e_s, color='orange', linestyle=':', linewidth=1.0, alpha=0.7)
+    ax.axhline(y=e_p, color='orange', linestyle=':', linewidth=1.0, alpha=0.7)
+    if t_sp != 0:
+        ax.fill_between(k_werte, ew_unten, ew_oben, color='gray', alpha=0.2, label='Bandlücke')
+        ax.vlines(x=k_min, ymin=ew_unten[idx_min], ymax=ew_oben[idx_min], color='black', linestyle='--', linewidth=1)
+        ax.vlines(x=-k_min, ymin=ew_unten[idx_min], ymax=ew_oben[idx_min], color='black', linestyle='--', linewidth=1)
+        write_to_output(f"Minimale Bandlücke: {bandlücke_min:.6f} bei k = {k_min:.4f}")
+
 
     # Achsenbeschriftungen und Legende
     ax.set_xlabel(r'$k$ (Wellenzahl)')
     ax.set_ylabel(r'$E(k)$ (Energie)')
     ax.legend()
     #ax.grid(True, linestyle='--', alpha=0.6)
+
+    write_to_output(f"Fermi-Energie (Median): {E_Fermi:.6f}")
 
