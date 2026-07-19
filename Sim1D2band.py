@@ -41,7 +41,7 @@ def twoband_1D(ax, write_to_output, params):
         bandlücke_k.append(E[1] - E[0])
 
     alle_energien = np.concatenate([ew_oben, ew_unten])
-    E_Fermi = np.median(alle_energien)
+    E_Fermi = np.max(ew_unten)#np.median(alle_energien)
     bandlücke_min = np.min(np.array(ew_oben) - np.array(ew_unten))
     idx_min = np.argmin(bandlücke_k)
     k_min = k_werte[idx_min]
@@ -68,5 +68,15 @@ def twoband_1D(ax, write_to_output, params):
     ax.legend()
     #ax.grid(True, linestyle='--', alpha=0.6)
 
-    write_to_output(f"Fermi-Energie (Median): {E_Fermi:.6f}")
+    write_to_output(f"Fermi-Energie: {E_Fermi:.6f}")
+    if t_sp == 0:
+        write_to_output("--> Metall")
+    elif E_Fermi < np.min(ew_oben):
+        if bandlücke_min < 3.0:
+            write_to_output("--> Halbleiter")
+        elif bandlücke_min >= 3.0:
+            write_to_output("--> Isolator")
+    elif E_Fermi >= np.min(ew_oben):
+        write_to_output("trotz t_sp != 0 --> Metall")
+
 
