@@ -23,6 +23,7 @@ def twoband_1D(ax, write_to_output, params):
     ew_oben = []
     ew_unten = []
     bandlücke_k = []
+    V_k_abs = []
     #####
     ##### # plus = nach unten offene Parabel
     ##### # minus = nach oben offene Parabel
@@ -39,6 +40,8 @@ def twoband_1D(ax, write_to_output, params):
         ew_unten.append(E[0])
         ew_oben.append(E[1])
         bandlücke_k.append(E[1] - E[0])
+        V_abs = 2 * abs(t_sp) * abs(math.sin(k * a))
+        V_k_abs.append(V_abs)
 
     alle_energien = np.concatenate([ew_oben, ew_unten])
     E_Fermi = np.max(ew_unten)#np.median(alle_energien)
@@ -50,6 +53,7 @@ def twoband_1D(ax, write_to_output, params):
     # Plotten der beiden Bänder
     ax.plot(k_werte, ew_oben, label='oberes Band (p)', color='red')
     ax.plot(k_werte, ew_unten, label='unteres Band (s)', color='blue')
+    ax.plot(k_werte, V_k_abs, label=r'$|V(k)|$', color='#42994B')
     ax.axhline(y=E_Fermi, color='green', linestyle='--', linewidth=1.2)
     ax.axhline(y=0.0, color='gray', linestyle='-', linewidth=1.0)
     ax.axvline(x=0.0, color='gray', linestyle='-', linewidth=1.0)
