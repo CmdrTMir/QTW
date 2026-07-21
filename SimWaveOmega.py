@@ -11,13 +11,13 @@ import math
 # ---- H-Laser ----
 def H_z(H_tb, z, sigma_z, k0, a):
     z0 = 3 * sigma_z
-    O0 = 0.2 * t
-    omega_0 = -2 * t * cos(k0 * a)
+    O0 = 0.2 * 0.5 # t = 0.5
+    omega_0 = -2 * 0.5 * math.cos(k0 * a)
 
     f_z = np.exp(-(z - z0)**2 / (2 * sigma_z**2))
     Omega = O0 * f_z * np.exp(-1j * omega_0 * z)
 
-    H_laser = np.zeros((N+1, N+1), dtype=complex)
+    H_laser = np.zeros(H_tb.shape, dtype=complex)
     H_laser[0, 1] = Omega
     H_laser[1, 0] = np.conj(Omega)
 
@@ -42,16 +42,20 @@ def wave_omega(ax, write_to_output, params):
 
     # definition of laser with omega
     # z = Zeit!
+    M = 5  # Anzahl der Sites, die das Paket überdeckt
+    sigma_x = (M * a) / 2.0
     v_g = ((2 * t * a) / hbar) * math.sin(k0 * a)
     if v_g == 0:
         tau = ((2 * t * a**2) / hbar) * math.cos(k0 * a)
+        sigma_z = 2.5 / t
     else:
         tau = (((N+1) * a) / v_g)
+        sigma_z = (2 * sigma_x) / v_g
 
-    M = 5  # Anzahl der Sites, die das Paket überdeckt
-    sigma_x = (M * a) / 2.0
-    sigma_z = (2 * sigma_x) / v_g
-    zf = 3 * sigma_z + 5 * sigma_z + tau # 5 = Faktor
+    z_puls_on = 3 * sigma_z
+    z_puls_off = 3 * sigma_z * 2 # definitiv aus
+    # tau = wandert durchs Gitter (oder bei v_g=0 Dissipation)
+    zf = z_puls_on + z_puls_off * sigma_z + tau
 
     # New calculation for H and c's
     vecs = []
@@ -112,26 +116,16 @@ def wave_omega(ax, write_to_output, params):
 
         for site in range(N+1):
             for i in range(len(loesung.t)):
-                rho_i = loesung.y[:, i].reshape(N+1, N+1)
-                wert = rho_i[site, site]
+                psi_i = loesung.y[site, i]
+                wert = np.abs(psi_i)**2
                 ew_listen[site].append(np.real(wert))
 
         t_all.extend(loesung.t)
 
-        # # Gesamtwahrscheinlichkeit im Gitter (ohne Vakuum)
-        # prob = np.sum(np.abs(ew_listen[1:])**2)
-        # # Abbruch, wenn das Paket das Gitter verlassen hat (z.B. 99% verschwunden)
-        # if prob < 0.01:
-        #     write_to_output("---> breaking because of probability!")
-        #     packet_out = True
-        #     break
     ###############################################################
-
 
     end_solve = time.perf_counter()
     write_to_output(f'Computing took {(end_solve - start_solve):.4f} s', "#228B22")
-    # if not packet_out:
-    #     write_to_output(f"WARNUNG: tf={tf} erreicht, aber das Wellenpaket ist noch nicht aus dem System herausgewandert.", "#CD2626")
 
     # Plot:
     max_val = max(max(ew_listen[1]), max(ew_listen[-1]))
@@ -142,6 +136,9 @@ def wave_omega(ax, write_to_output, params):
 
     ax.plot(t_all, ew_listen[1], "b-")
     ax.plot(t_all, ew_listen[-1], "r--")
+    ax.axvline(x=z_puls_on, color='orange', linestyle='-', linewidth=1.0, alpha=1.0)
+    ax.axvline(x=z_puls_off, color='orange', linestyle='-', linewidth=1.0, alpha=1.0)
+    ax.axvline(x=tau, color='orange', linestyle='-', linewidth=1.0, alpha=1.0)
     ax.grid(True)
     ax.set_ylim(0, y_max)
     ax.set_xlim(0, t_all[-1] + 1)
@@ -150,20 +147,6 @@ def wave_omega(ax, write_to_output, params):
     ax.set_ylabel(r'$\langle n_j \rangle$')
     ax.set_title(f'Besetzungszahlen für N={N} Sites')
     ax.legend(['Site 1', 'Site N'])
-
-
-## TODO: in GUI
-## TODO: testen
-## TODO: siehe Waveinit und checke abbruchbedingung
-## TODO: Tiefes Denken bei KI an und dann Zusammenfassung Text Notizen, Formeln.
-
-
-
-
-
-
-
-
 
 
 

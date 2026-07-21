@@ -85,9 +85,10 @@ def wave_init(ax, write_to_output, params):
     v_g = ((2 * t * a) / hbar) * math.sin(k0 * a)
     if v_g == 0:
         tau = ((2 * t * a**2) / hbar) * math.cos(k0 * a)
+        tf = tau * 40
     else:
         tau = (((N+1) * a) / v_g)
-    tf = tau * 20 # 2 = Faktor
+        tf = tau * 10 # 2 = Faktor
 
     write_to_output(f'v_g: {v_g:.4f} \t tau:{tau:.4f} \t tf:{tf:.4f}')
 
@@ -125,8 +126,7 @@ def wave_init(ax, write_to_output, params):
 
         t_all.extend(loesung.t)
 
-        # Gesamtwahrscheinlichkeit im Gitter (ohne Vakuum)
-        prob = np.sum(np.abs(ew_listen[1:])**2) # falsch? Aber wie und warum?
+        prob = sum(ew_listen[site][-1] for site in range(1, N+1))
         # Abbruch, wenn das Paket das Gitter verlassen hat (z.B. 99% verschwunden)
         if prob < 0.01:
             write_to_output("---> breaking because of probability!")
@@ -149,6 +149,7 @@ def wave_init(ax, write_to_output, params):
 
     ax.plot(t_all, ew_listen[1], "b-")
     ax.plot(t_all, ew_listen[-1], "r--")
+    ax.axvline(x=tau, color='orange', linestyle='-', linewidth=1.0, alpha=1.0)
     ax.grid(True)
     ax.set_ylim(0, y_max)
     ax.set_xlim(0, t_all[-1] + 1)

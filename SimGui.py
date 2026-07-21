@@ -17,6 +17,7 @@ from Sim2DAni import ani_2D
 from SimEigenvals2D import eigenvals_2D
 from Sim1D2band import twoband_1D
 from SimWaveInit import wave_init
+from SimWaveOmega import wave_omega
 
 
 class TabWithMode(ttk.Frame):
@@ -260,6 +261,8 @@ class MainApp:
         sub_notebook4.add(tab12, text="eigenvals_2D")
         tab13 = TabWithMode(sub_notebook4, "wave_init", wave_init, ["N", "k0"])
         sub_notebook4.add(tab13, text="wave_init")
+        tab14 = TabWithMode(sub_notebook4, "wave_omega", wave_omega, ["N", "k0"])
+        sub_notebook4.add(tab14, text="wave_omega")
         #tab11 = TabWithMode(sub_notebook4, "2D Animation", ani_2D, ["N", "t", "gamma", "kappa", "tf"])
         #sub_notebook4.add(tab11, text="2D Animation")
 
