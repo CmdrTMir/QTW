@@ -16,6 +16,7 @@ from Sim2D import dimRed_2D
 from Sim2DAni import ani_2D
 from SimEigenvals2D import eigenvals_2D
 from Sim1D2band import twoband_1D
+from SimWaveInit import wave_init
 
 
 class TabWithMode(ttk.Frame):
@@ -74,6 +75,11 @@ class TabWithMode(ttk.Frame):
                 self.tf_var = tk.IntVar(value=100)
                 self.tf_spin = tk.Spinbox(param_frame, from_=50, to=1000, textvariable=self.tf_var, font=("Arial", 12), width=5)
                 self.tf_spin.pack(side=tk.LEFT, padx=5)
+            if "k0" in param_list: # k0 Parameter
+                tk.Label(param_frame, text="k0: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
+                self.k0_var = tk.DoubleVar(value=1.5708)
+                self.k0_spin = tk.Spinbox(param_frame, from_=0.0, to=25.0, increment=0.1, textvariable=self.k0_var, font=("Arial", 12), width=8)
+                self.k0_spin.pack(side=tk.LEFT, padx=5)
             # Params for 2band model:
             if "t_ss" in param_list:
                 tk.Label(param_frame, text="t_ss: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
@@ -109,6 +115,7 @@ class TabWithMode(ttk.Frame):
             if hasattr(self, 'kappa_var'): self.param_vars['kappa'] = self.kappa_var
             if hasattr(self, 'd_var'): self.param_vars['d'] = self.d_var
             if hasattr(self, 'tf_var'): self.param_vars['tf'] = self.tf_var
+            if hasattr(self, 'k0_var'): self.param_vars['k0'] = self.k0_var
             if hasattr(self, 'tss_var'): self.param_vars['t_ss'] = self.tss_var
             if hasattr(self, 'tpp_var'): self.param_vars['t_pp'] = self.tpp_var
             if hasattr(self, 'tsp_var'): self.param_vars['t_sp'] = self.tsp_var
@@ -251,6 +258,8 @@ class MainApp:
         sub_notebook4.add(tab10, text="2D")
         tab12 = TabWithMode(sub_notebook4, "eigenvals_2D", eigenvals_2D, ["N", "t", "t_v", "t_d"], 2) # <- 2 plots
         sub_notebook4.add(tab12, text="eigenvals_2D")
+        tab13 = TabWithMode(sub_notebook4, "wave_init", wave_init, ["N", "k0"])
+        sub_notebook4.add(tab13, text="wave_init")
         #tab11 = TabWithMode(sub_notebook4, "2D Animation", ani_2D, ["N", "t", "gamma", "kappa", "tf"])
         #sub_notebook4.add(tab11, text="2D Animation")
 
