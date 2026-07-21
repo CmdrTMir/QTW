@@ -79,7 +79,7 @@ class TabWithMode(ttk.Frame):
             if "k0" in param_list: # k0 Parameter
                 tk.Label(param_frame, text="k0: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
                 self.k0_var = tk.DoubleVar(value=1.5708)
-                self.k0_spin = tk.Spinbox(param_frame, from_=0.0, to=25.0, increment=0.1, textvariable=self.k0_var, font=("Arial", 12), width=8)
+                self.k0_spin = tk.Spinbox(param_frame, from_=0.0, to=25.0, increment=0.001, textvariable=self.k0_var, font=("Arial", 12), width=8)
                 self.k0_spin.pack(side=tk.LEFT, padx=5)
             # Params for 2band model:
             if "t_ss" in param_list:

@@ -14,7 +14,7 @@ def H_z(H_tb, z, sigma_z, k0, a):
     O0 = 0.2 * 0.5 # t = 0.5
     omega_0 = -2 * 0.5 * math.cos(k0 * a)
 
-    f_z = np.exp(-(z - z0)**2 / (2 * sigma_z**2))
+    f_z = np.exp(-(z - z0)**2 / (2 * sigma_z**2)) # Gauß
     Omega = O0 * f_z * np.exp(-1j * omega_0 * z)
 
     H_laser = np.zeros(H_tb.shape, dtype=complex)
@@ -88,8 +88,6 @@ def wave_omega(ax, write_to_output, params):
     ###############################################################
 
     write_to_output(f'v_g: {v_g:.4f} \t tau:{tau:.4f} \t tf:{zf:.4f}')
-
-    #packet_out = False
 
     dt = 0.5
     t0 = 0

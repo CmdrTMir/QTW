@@ -80,7 +80,6 @@ def wave_init(ax, write_to_output, params):
     start_solve = time.perf_counter()
     # Solver
     ###############################################################
-    # Umrechnung
     hbar = 1
     v_g = ((2 * t * a) / hbar) * math.sin(k0 * a)
     if v_g == 0:
@@ -88,13 +87,12 @@ def wave_init(ax, write_to_output, params):
         tf = tau * 40
     else:
         tau = (((N+1) * a) / v_g)
-        tf = tau * 10 # 2 = Faktor
+        tf = tau * 10 # * x = Faktor
 
     write_to_output(f'v_g: {v_g:.4f} \t tau:{tau:.4f} \t tf:{tf:.4f}')
 
     packet_out = False
 
-    eps_delta = 1e-3
     dt = 0.5
     t0 = 0
     t_all = []
@@ -163,9 +161,9 @@ def wave_init(ax, write_to_output, params):
 
 
 ## TODO: - check if I can make the wavepacket symmetrical, such that it really is a complete Gauß.
-## TODO: - see how I can define tau and tf better, because different scenario then deltas.
+## TODO: - see how I can define tf better.
 ## TODO: - make table for k0s to see at which phases the packet really propagates.
-## TODO: - change L_out such that the packet goes out quicker, maybe in combination with tau/tf
+## TODO: - change L_out such that the packet goes out quicker, maybe in combination with two above
 
 
 
