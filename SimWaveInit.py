@@ -8,9 +8,6 @@ import qutip as qt
 import time
 import math
 
-# global variable
-ss_values = None
-
 # ---- Lindblad-Terme ----
 def fun_rho_dot(t, y, H, c, c_dag, gamma, N):
     rho = y.reshape(N+1, N+1)
@@ -95,7 +92,6 @@ def wave_init(ax, write_to_output, params):
     write_to_output(f'v_g: {v_g:.4f} \t tau:{tau:.4f} \t tf:{tf:.4f}')
 
     packet_out = False
-    deltas = False
 
     eps_delta = 1e-3
     dt = 0.5
@@ -130,7 +126,7 @@ def wave_init(ax, write_to_output, params):
         t_all.extend(loesung.t)
 
         # Gesamtwahrscheinlichkeit im Gitter (ohne Vakuum)
-        prob = np.sum(np.abs(ew_listen[1:])**2)
+        prob = np.sum(np.abs(ew_listen[1:])**2) # falsch? Aber wie und warum?
         # Abbruch, wenn das Paket das Gitter verlassen hat (z.B. 99% verschwunden)
         if prob < 0.01:
             write_to_output("---> breaking because of probability!")
@@ -165,7 +161,10 @@ def wave_init(ax, write_to_output, params):
 
 
 
-
+## TODO: - check if I can make the wavepacket symmetrical, such that it really is a complete Gauß.
+## TODO: - see how I can define tau and tf better, because different scenario then deltas.
+## TODO: - make table for k0s to see at which phases the packet really propagates.
+## TODO: - change L_out such that the packet goes out quicker, maybe in combination with tau/tf
 
 
 
