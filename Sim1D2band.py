@@ -24,6 +24,7 @@ def twoband_1D(ax, write_to_output, params):
     ew_unten = []
     bandlücke_k = []
     V_k_abs = []
+    evs = []
     #####
     ##### # plus = nach unten offene Parabel
     ##### # minus = nach oben offene Parabel
@@ -36,11 +37,12 @@ def twoband_1D(ax, write_to_output, params):
         H_11 = e_p + 2 * t_pp * math.cos(k*a)
 
         H_k = np.array([[H_00, H_01], [H_10, H_11]])
-        E = np.linalg.eigvalsh(H_k)
+        E, ev = np.linalg.eigh(H_k)
         ew_unten.append(E[0])
         ew_oben.append(E[1])
+        evs.append(ev)
         bandlücke_k.append(E[1] - E[0])
-        V_abs = 2 * abs(t_sp) * abs(math.sin(k * a))
+        V_abs = 2 * abs(t_sp) * abs(math.sin(k * a)) #np.real(2j * t_sp * math.sin(k*a))
         V_k_abs.append(V_abs)
 
     alle_energien = np.concatenate([ew_oben, ew_unten])
@@ -49,14 +51,35 @@ def twoband_1D(ax, write_to_output, params):
     idx_min = np.argmin(bandlücke_k)
     k_min = k_werte[idx_min]
 
+    s_sa = []
+    p_sa = []
+    s_pa = []
+    p_pa = []
+    for vs in evs:#k-mal
+        s_sa.append(abs(vs[0][0])**2) # s s-anteil
+        p_sa.append(abs(vs[1][0])**2) # p s-anteil
+        s_pa.append(abs(vs[0][1])**2) # s p-anteil
+        p_pa.append(abs(vs[1][1])**2) # p p-anteil
+
 
     # Plotten der beiden Bänder
     ax.plot(k_werte, ew_oben, label='oberes Band (p)', color='red')
     ax.plot(k_werte, ew_unten, label='unteres Band (s)', color='blue')
     ax.plot(k_werte, V_k_abs, label=r'$|V(k)|$', color='#42994B')
-    ax.axhline(y=E_Fermi, color='green', linestyle='--', linewidth=1.2)
+    ax.plot(k_werte, s_sa, color='black', linestyle='--')
+    ax.plot(k_werte, s_pa, color='black', linestyle='--')
+    ax.plot(k_werte, p_sa, color='yellow', linestyle=':')
+    ax.plot(k_werte, p_pa, color='yellow', linestyle=':')
+    write_to_output("Eigenvectors: ")
+    write_to_output("s s-Anteil: black --")
+    write_to_output("s p-Anteil: black --")
+    write_to_output("p s-Anteil: yellow :")
+    write_to_output("p p-Anteil: yellow :")
+    ax.axhline(y=E_Fermi, color='#A52BFB', linestyle='--', linewidth=1.2)
     ax.axhline(y=0.0, color='gray', linestyle='-', linewidth=1.0)
     ax.axvline(x=0.0, color='gray', linestyle='-', linewidth=1.0)
+    ax.axvline(x=math.pi, color='gray', linestyle='-', linewidth=1.0)
+    ax.axvline(x=-math.pi, color='gray', linestyle='-', linewidth=1.0)
     ax.axhline(y=e_s, color='orange', linestyle=':', linewidth=1.0, alpha=0.7)
     ax.axhline(y=e_p, color='orange', linestyle=':', linewidth=1.0, alpha=0.7)
     if t_sp != 0:
