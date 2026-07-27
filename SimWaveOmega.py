@@ -11,11 +11,11 @@ import math
 # ---- H-Laser ----
 def H_z(H_tb, z, sigma_z, k0, a):
     z0 = 3 * sigma_z
-    O0 = 0.2 * 0.5 # t = 0.5
-    omega_0 = -2 * 0.5 * math.cos(k0 * a)
+    O0 = 0.2 * 0.5 # t = 0.5                        # O0 - Kopplungsstärke
+    omega_0 = -2 * 0.5 * math.cos(k0 * a)           # Trägerfrequenz des Lasers?
 
-    f_z = np.exp(-(z - z0)**2 / (2 * sigma_z**2)) # Gauß
-    Omega = O0 * f_z * np.exp(-1j * omega_0 * z)
+    f_z = np.exp(-(z - z0)**2 / (2 * sigma_z**2))   # Gauß-Teil
+    Omega = O0 * f_z * np.exp(-1j * omega_0 * z)    # Zusammensetzen (abhängig von Zeit z)
 
     H_laser = np.zeros(H_tb.shape, dtype=complex)
     H_laser[0, 1] = Omega
@@ -27,14 +27,14 @@ def H_z(H_tb, z, sigma_z, k0, a):
 def schrödinger(t, y, H_tb, hbar, sigma_z, k0, a):
     psi = y
     H = H_z(H_tb, t, sigma_z, k0, a)
-    psi_dot = -1j/ hbar * (H @ psi)
+    psi_dot = -1j / hbar * (H @ psi)
     return psi_dot
 
 def wave_omega(ax, write_to_output, params):
     # ---- Variablen ----
     N = params.get("N", 2)
     t = 0.5 #params.get("t", 1.0)
-    a = 1 # damit ist die Brillouin-Zone -pi < k0 < pi
+    a = 1   # damit ist die Brillouin-Zone -pi < k0 < pi
     k0 = params.get("k0", 1.5708) # np.pi / 2
     hbar = 1
 
@@ -42,12 +42,12 @@ def wave_omega(ax, write_to_output, params):
 
     # definition of laser with omega
     # z = Zeit!
-    M = 5  # Anzahl der Sites, die das Paket überdeckt
-    sigma_x = (M * a) / 2.0
+    M = 5                                                   # Anzahl der Sites, die das Paket überdeckt
+    sigma_x = (M * a) / 2.0                                 # örtliche Breite des Pulses
     v_g = ((2 * t * a) / hbar) * math.sin(k0 * a)
     if v_g == 0:
-        tau = ((2 * t * a**2) / hbar) * math.cos(k0 * a)
-        sigma_z = 2.5 / t
+        tau = ((2 * t * a**2) / hbar) * math.cos(k0 * a)    # Dissipation (2. Derivation)
+        sigma_z = 2.5 / t                                   # zeitliche Breite des Pulses
     else:
         tau = (((N+1) * a) / v_g)
         sigma_z = (2 * sigma_x) / v_g
@@ -96,7 +96,6 @@ def wave_omega(ax, write_to_output, params):
     y = psi0
     ew_listen = [[] for _ in range(N+1)]
 
-    count = 0
     while t0 < zf:
         loesung = si.solve_ivp(
             fun=schrödinger,

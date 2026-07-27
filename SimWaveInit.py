@@ -22,8 +22,8 @@ def wave_init(ax, write_to_output, params):
     # ---- Variablen ----
     N = params.get("N", 2)
     t = 0.5 #params.get("t", 1.0)
-    gamma = 0.1 #params.get("gamma", 1.0)
-    a = 1 # damit ist die Brillouin-Zone -pi < k0 < pi
+    gamma = 0.25 #params.get("gamma", 1.0)
+    a = 1       # damit ist die Brillouin-Zone -pi < k0 < pi
     k0 = params.get("k0", 1.5708) # np.pi / 2
 
     write_to_output(f'The parameters are set to:    t: {t:.2f};  in: wavepacket;  out: {gamma:.2f}')
@@ -99,8 +99,8 @@ def wave_init(ax, write_to_output, params):
 
     y = rho0.flatten()
     ew_listen = [[] for _ in range(N+1)]
+    prob = 100
 
-    count = 0
     while t0 < tf:
         loesung = si.solve_ivp(
             fun=fun_rho_dot,
@@ -134,9 +134,10 @@ def wave_init(ax, write_to_output, params):
 
 
     end_solve = time.perf_counter()
-    write_to_output(f'Solving took {(end_solve - start_solve):.4f} s', "#228B22")
+    write_to_output(f'Computing took {(end_solve - start_solve):.4f} s', "#228B22")
     if not packet_out:
         write_to_output(f"WARNUNG: tf={tf} erreicht, aber das Wellenpaket ist noch nicht aus dem System herausgewandert.", "#CD2626")
+    write_to_output(f'Probability is at: {prob:.4f}')
 
     # Plot:
     max_val = max(max(ew_listen[1]), max(ew_listen[-1]))
