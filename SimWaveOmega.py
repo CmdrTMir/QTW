@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
+import matplotlib.widgets as widgets
 from scipy import constants
 from scipy.linalg import eigh
 import scipy.integrate as si
@@ -131,19 +132,93 @@ def wave_omega(ax, write_to_output, params):
     else:
         y_max = max_val * 1.1
 
-    ax.plot(t_all, ew_listen[1], "b-")
-    ax.plot(t_all, ew_listen[-1], "r--")
-    ax.axvline(x=z_puls_on, color='orange', linestyle='-', linewidth=1.0, alpha=1.0)
-    ax.axvline(x=z_puls_off, color='orange', linestyle='-', linewidth=1.0, alpha=1.0)
-    ax.axvline(x=tau, color='orange', linestyle='-', linewidth=1.0, alpha=1.0)
-    ax.grid(True)
-    ax.set_ylim(0, y_max)
-    ax.set_xlim(0, t_all[-1] + 1)
+    write_to_output(f'Time steps in t_all: {len(t_all)}')
+    num_frames = min(700, max(400, len(t_all) // 4))
+    t_min = t_all[0]
+    t_max = t_all[-1]
+    if t_min == 0:
+        t_min = 1e-6
+    log_times = np.logspace(np.log10(t_min), np.log10(t_max), num_frames)
+    indices = [0] + [np.argmin(np.abs(np.array(t_all) - t)) for t in log_times] + [len(t_all) - 1]
+    indices = np.unique(indices)
+    #indices = range(0, len(t_all), step)
+    t_selected = [t_all[i] for i in indices]
 
-    ax.set_xlabel('Zeit')
-    ax.set_ylabel(r'$\langle n_j \rangle$')
-    ax.set_title(f'Besetzungszahlen für N={N} Sites')
-    ax.legend(['Site 1', 'Site N'])
+    write_to_output(f'Time steps selected: {len(t_selected)}')
+    ew_selected = [] # ohne Vakuum! 0=>1
+    for site in range(1, N+1):
+        ew_site_selected = [ew_listen[site][i] for i in indices]
+        ew_selected.append(ew_site_selected)
+
+    fig = ax.figure
+    if hasattr(fig, '_slider'):
+        fig._slider.disconnect_events()
+        del fig._slider
+    fig.clear()
+    ax = fig.add_subplot(111)
+    fig.subplots_adjust(bottom=0.2)
+    slider_ax = fig.add_axes([0.2, 0.02, 0.6, 0.04])
+    slider = widgets.Slider(
+        ax=slider_ax, label='Steps:  ', valmin=0, valmax=len(t_selected)-1,
+        valinit=0, valstep=1
+    )
+    fig._slider = slider
+
+    def get_occupations(idx):
+        return [ew_selected[site][idx] for site in range(N)]
+
+    # Initialer Plot
+    idx = 0
+    occupations = get_occupations(idx)
+    bars = ax.bar(range(1, N+1), occupations, color='#fbb32b')
+    ax.set_xlabel('Site')
+    ax.set_ylabel('Erwartungswert')
+    ax.set_title(f'Zeit = {t_selected[idx]:.3f}')
+    ax.set_ylim(0, y_max)
+    ax.set_xticks(range(1, N+1))
+
+    # Update-Funktion für Slider-Bewegung
+    def update(val):
+        idx = int(slider.val)
+        occupations = get_occupations(idx)
+        ax.clear()
+        ax.bar(range(1, N+1), occupations, color='#fbb32b')
+        ax.set_xlabel('Site')
+        ax.set_ylabel('Erwartungswert')
+        ax.set_title(f'Zeit = {t_selected[idx]:.3f}')
+        ax.set_ylim(0, y_max)
+        ax.set_xticks(range(1, N+1))
+        fig.canvas.draw()
+
+    slider.on_changed(update)
+    fig.canvas.draw()
+    fig.canvas.flush_events()
+
+
+# TODO: check if and why the expectation values are so small and for a long time at 0.
+
+
+
+    #Alter Plot:
+    # max_val = max(max(ew_listen[1]), max(ew_listen[-1]))
+    # if max_val < 0.01:
+    #     y_max = 0.01
+    # else:
+    #     y_max = max_val * 1.1
+    #
+    # ax.plot(t_all, ew_listen[1], "b-")
+    # ax.plot(t_all, ew_listen[-1], "r--")
+    # ax.axvline(x=z_puls_on, color='orange', linestyle='-', linewidth=1.0, alpha=1.0)
+    # ax.axvline(x=z_puls_off, color='orange', linestyle='-', linewidth=1.0, alpha=1.0)
+    # ax.axvline(x=tau, color='orange', linestyle='-', linewidth=1.0, alpha=1.0)
+    # ax.grid(True)
+    # ax.set_ylim(0, y_max)
+    # ax.set_xlim(0, t_all[-1] + 1)
+    #
+    # ax.set_xlabel('Zeit')
+    # ax.set_ylabel(r'$\langle n_j \rangle$')
+    # ax.set_title(f'Besetzungszahlen für N={N} Sites')
+    # ax.legend(['Site 1', 'Site N'])
 
 
 

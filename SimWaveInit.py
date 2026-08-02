@@ -147,10 +147,19 @@ def wave_init(ax, write_to_output, params):
     else:
         y_max = max_val * 1.1
 
-    step = 10
-    indices = range(0, len(t_all), step)
+    write_to_output(f'Time steps in t_all: {len(t_all)}')
+    num_frames = min(700, max(400, len(t_all) // 4))
+    t_min = t_all[0]
+    t_max = t_all[-1]
+    if t_min == 0:
+        t_min = 1e-6
+    log_times = np.logspace(np.log10(t_min), np.log10(t_max), num_frames)
+    indices = [0] + [np.argmin(np.abs(np.array(t_all) - t)) for t in log_times] + [len(t_all) - 1]
+    indices = np.unique(indices)
+    #indices = range(0, len(t_all), step)
     t_selected = [t_all[i] for i in indices]
-    write_to_output(f'T SELECTED LENGTH: {len(t_selected)}')
+
+    write_to_output(f'Time steps selected: {len(t_selected)}')
     ew_selected = [] # ohne Vakuum! 0=>1
     for site in range(1, N+1):
         ew_site_selected = [ew_listen[site][i] for i in indices]
@@ -165,7 +174,7 @@ def wave_init(ax, write_to_output, params):
     fig.subplots_adjust(bottom=0.2)
     slider_ax = fig.add_axes([0.2, 0.02, 0.6, 0.04])
     slider = widgets.Slider(
-        ax=slider_ax, label='Zeitindex', valmin=0, valmax=len(t_selected)-1,
+        ax=slider_ax, label='Steps:  ', valmin=0, valmax=len(t_selected)-1,
         valinit=0, valstep=1
     )
     fig._slider = slider
@@ -197,15 +206,19 @@ def wave_init(ax, write_to_output, params):
         fig.canvas.draw()
 
     slider.on_changed(update)
-    write_to_output(f"Balkenplot mit Slider erstellt ({len(t_all)/10} Zeitpunkte)")
     fig.canvas.draw()
     fig.canvas.flush_events()
 
 
 
 
-    #alter plot:
-    #
+## TODO: - check if I can make the wavepacket symmetrical, such that it really is a complete Gauß.
+## TODO: - see how I can define tf better.
+## TODO: - make table for k0s to see at which phases the packet really propagates.
+## TODO: - change L_out such that the packet goes out quicker, maybe in combination with two above
+
+
+    #Alter Plot:
     # ax.plot(t_all, ew_listen[1], "b-")
     # ax.plot(t_all, ew_listen[-1], "r--")
     # ax.axvline(x=tau, color='orange', linestyle='-', linewidth=1.0, alpha=1.0)
@@ -217,14 +230,6 @@ def wave_init(ax, write_to_output, params):
     # ax.set_ylabel(r'$\langle n_j \rangle$')
     # ax.set_title(f'Besetzungszahlen für N={N} Sites')
     # ax.legend(['Site 1', 'Site N'])
-
-
-
-
-## TODO: - check if I can make the wavepacket symmetrical, such that it really is a complete Gauß.
-## TODO: - see how I can define tf better.
-## TODO: - make table for k0s to see at which phases the packet really propagates.
-## TODO: - change L_out such that the packet goes out quicker, maybe in combination with two above
 
 
 
