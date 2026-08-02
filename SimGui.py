@@ -21,16 +21,17 @@ from SimWaveOmega import wave_omega
 
 
 class TabWithMode(ttk.Frame):
-    def __init__(self, parent, tab_name, script_func, param_list=None, n_axes=1):
+    def __init__(self, parent, tab_name, script_func, param_list=None, n_axes=1, drawing=True):
         super().__init__(parent)
         self.script_func = script_func
         self.params = param_list
         self.n_axes = n_axes
+        self.drawing = drawing
 
         # Beschreibungsbox oben
-        self.desc = tk.Text(self, height=4, wrap=tk.WORD)
-        self.desc.pack(fill=tk.X, padx=5, pady=5)
-        self.desc.insert(tk.END, f"Tab: {tab_name}")
+        #self.desc = tk.Text(self, height=4, wrap=tk.WORD)
+        #self.desc.pack(fill=tk.X, padx=5, pady=5)
+        #self.desc.insert(tk.END, f"Tab: {tab_name}")
 
         if param_list:
             # Parameter-Frame
@@ -135,7 +136,7 @@ class TabWithMode(ttk.Frame):
             self.figure, (self.ax1, self.ax2) = plt.subplots(1, 2, figsize=(6, 4))
             self.ax = self.ax1
         else:
-            self.figure, self.ax = plt.subplots(figsize=(6, 4))
+            self.figure, self.ax = plt.subplots(figsize=(7, 6))
         self.canvas = FigureCanvasTkAgg(self.figure, self)
         self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
@@ -178,7 +179,8 @@ class TabWithMode(ttk.Frame):
                 self.script_func(self.ax, self.write_to_output, params)
         else:
             self.script_func(self.ax, self.write_to_output)
-        self.canvas.draw()
+        if self.drawing:
+            self.canvas.draw()
 
     def execute_steady_state(self):
         if hasattr(self, 'param_vars'):
@@ -257,11 +259,11 @@ class MainApp:
         sub_notebook4.add(tab9, text="Kette zu 2D")
         tab10 = TabWithMode(sub_notebook4, "2D", dimRed_2D, ["N", "t", "t_v", "tf"])
         sub_notebook4.add(tab10, text="2D")
-        tab12 = TabWithMode(sub_notebook4, "eigenvals_2D", eigenvals_2D, ["N", "t", "t_v", "t_d"], 2) # <- 2 plots
+        tab12 = TabWithMode(sub_notebook4, "eigenvals_2D", eigenvals_2D, ["N", "t", "t_v", "t_d"], n_axes=2) # <- 2 plots
         sub_notebook4.add(tab12, text="eigenvals_2D")
-        tab13 = TabWithMode(sub_notebook4, "wave_init", wave_init, ["N", "k0"])
+        tab13 = TabWithMode(sub_notebook4, "wave_init", wave_init, ["N", "k0"], drawing=False)
         sub_notebook4.add(tab13, text="wave_init")
-        tab14 = TabWithMode(sub_notebook4, "wave_omega", wave_omega, ["N", "k0"])
+        tab14 = TabWithMode(sub_notebook4, "wave_omega", wave_omega, ["N", "k0"], drawing=False)
         sub_notebook4.add(tab14, text="wave_omega")
         #tab11 = TabWithMode(sub_notebook4, "2D Animation", ani_2D, ["N", "t", "gamma", "kappa", "tf"])
         #sub_notebook4.add(tab11, text="2D Animation")
