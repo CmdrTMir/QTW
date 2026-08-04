@@ -12,11 +12,20 @@ def twoband_1D(ax, write_to_output, params):
     # ---- Variablen ----
     t_ss = params.get("t_ss", 1.0)
     t_pp = params.get("t_pp", 1.0)
-    t_sp = params.get("t_sp", 0.0)
-    e_s = params.get("e_s", 1.0)
-    e_p = params.get("e_p", 1.0)
+    r_tsp = params.get("r_tsp", 0.0)
+    t_tsp = params.get("t_tsp", 0.0)
+    r_tps = params.get("r_tps", 0.0)
+    t_tps = params.get("t_tps", 0.0)
+    e_s = params.get("e_s", 0.0)
+    e_p = params.get("e_p", 0.0)
     ks = 200
     a = 1.0
+
+    write_to_output(f'r_tsp: {r_tsp}; t_tsp: {t_tsp}; r_tps: {r_tps}; t_tps: {t_tps}')
+    t_sp = r_tsp * math.e**(-1j*t_tsp)
+    t_ps = r_tps * math.e**(-1j*t_tps)
+    write_to_output(f't_sp: {t_sp}')
+    write_to_output(f't_ps: {t_ps}')
 
     k_werte = np.linspace(-np.pi/a, np.pi/a, ks)
 
@@ -25,15 +34,12 @@ def twoband_1D(ax, write_to_output, params):
     bandlücke_k = []
     V_k_abs = []
     evs = []
-    #####
-    ##### # plus = nach unten offene Parabel
-    ##### # minus = nach oben offene Parabel
-    ##### oder man definiert t < 0 ?
-    #####
+
+    # Vorzeichen umgedreht, im Vergleich zu Formeln, damit die Parabeln anders herum sind.
     for k in k_werte:
         H_00 = e_s + 2 * t_ss * math.cos(k*a)
-        H_10 = 2j * t_sp * math.sin(k*a)
-        H_01 = -2j * t_sp * math.sin(k*a)
+        H_01 = t_ps * math.e**(-1j*k*a) - t_sp * math.e**(1j*k*a)
+        H_10 = t_sp * math.e**(-1j*k*a) - t_ps * math.e**(1j*k*a)
         H_11 = e_p + 2 * t_pp * math.cos(k*a)
 
         H_k = np.array([[H_00, H_01], [H_10, H_11]])
@@ -61,39 +67,66 @@ def twoband_1D(ax, write_to_output, params):
         s_pa.append(abs(vs[0][1])**2) # s p-anteil
         p_pa.append(abs(vs[1][1])**2) # p p-anteil
 
+    # Referenz-Bänder ohne Hybridisierung (t_sp = 0, t_ps = 0)
+    ew_oben_ref = []
+    ew_unten_ref = []
 
+    for k in k_werte:
+        H_00_ref = e_s + 2 * t_ss * math.cos(k*a)
+        H_11_ref = e_p + 2 * t_pp * math.cos(k*a)
+        H_k_ref = np.array([[H_00_ref, 0], [0, H_11_ref]])
+        E_ref = np.linalg.eigvalsh(H_k_ref)
+        ew_unten_ref.append(E_ref[0])
+        ew_oben_ref.append(E_ref[1])
+
+    fig = ax.figure
     # Plotten der beiden Bänder
     ax.plot(k_werte, ew_oben, label='oberes Band (p)', color='red')
     ax.plot(k_werte, ew_unten, label='unteres Band (s)', color='blue')
     ax.plot(k_werte, V_k_abs, label=r'$|V(k)|$', color='#42994B')
-    ax.plot(k_werte, s_sa, color='black', linestyle='--')
-    ax.plot(k_werte, s_pa, color='black', linestyle='--')
-    ax.plot(k_werte, p_sa, color='yellow', linestyle=':')
-    ax.plot(k_werte, p_pa, color='yellow', linestyle=':')
-    write_to_output("Eigenvectors: ")
-    write_to_output("s s-Anteil: black --")
-    write_to_output("s p-Anteil: black --")
-    write_to_output("p s-Anteil: yellow :")
-    write_to_output("p p-Anteil: yellow :")
-    ax.axhline(y=E_Fermi, color='#A52BFB', linestyle='--', linewidth=1.2)
+    #ax.plot(k_werte, s_sa, color='black', linestyle='--')
+    #ax.plot(k_werte, s_pa, color='black', linestyle='--')
+    #ax.plot(k_werte, p_sa, color='yellow', linestyle=':')
+    #ax.plot(k_werte, p_pa, color='yellow', linestyle=':')
+    #write_to_output("Eigenvectors: ")
+    #write_to_output("s s-Anteil: black --")
+    #write_to_output("s p-Anteil: black --")
+    #write_to_output("p s-Anteil: yellow :")
+    #write_to_output("p p-Anteil: yellow :")
+    ax.plot(k_werte, ew_oben_ref, color='red', linestyle='--', linewidth=0.8, alpha=0.5)
+    ax.plot(k_werte, ew_unten_ref, color='blue', linestyle='--', linewidth=0.8, alpha=0.5)
+
+    ax.axhline(y=E_Fermi, color='#A52BFB', linestyle='-.', linewidth=1.2, label='Fermi-Energy')
     ax.axhline(y=0.0, color='gray', linestyle='-', linewidth=1.0)
     ax.axvline(x=0.0, color='gray', linestyle='-', linewidth=1.0)
-    ax.axvline(x=math.pi, color='gray', linestyle='-', linewidth=1.0)
-    ax.axvline(x=-math.pi, color='gray', linestyle='-', linewidth=1.0)
+    #ax.axvline(x=math.pi, color='gray', linestyle='-', linewidth=1.0)
+    #ax.axvline(x=-math.pi, color='gray', linestyle='-', linewidth=1.0)
     ax.axhline(y=e_s, color='orange', linestyle=':', linewidth=1.0, alpha=0.7)
     ax.axhline(y=e_p, color='orange', linestyle=':', linewidth=1.0, alpha=0.7)
     if t_sp != 0:
-        ax.fill_between(k_werte, ew_unten, ew_oben, color='gray', alpha=0.2, label='Bandlücke')
-        ax.vlines(x=k_min, ymin=ew_unten[idx_min], ymax=ew_oben[idx_min], color='black', linestyle='--', linewidth=1)
-        ax.vlines(x=-k_min, ymin=ew_unten[idx_min], ymax=ew_oben[idx_min], color='black', linestyle='--', linewidth=1)
+        ax.fill_between(k_werte, ew_unten, ew_oben, color='gray', alpha=0.2, label='band gap')
+        #ax.vlines(x=k_min, ymin=ew_unten[idx_min], ymax=ew_oben[idx_min], color='black', linestyle='--', linewidth=1)
+        #ax.vlines(x=-k_min, ymin=ew_unten[idx_min], ymax=ew_oben[idx_min], color='black', linestyle='--', linewidth=1)
         write_to_output(f"Minimale Bandlücke: {bandlücke_min:.6f} bei k = {k_min:.4f}")
 
 
     # Achsenbeschriftungen und Legende
-    ax.set_xlabel(r'$k$ (Wellenzahl)')
-    ax.set_ylabel(r'$E(k)$ (Energie)')
-    ax.legend()
+    ax.set_xlabel(r'$k$ (wave number)')
+    ax.set_ylabel(r'$E(k)$')
+    #ax.legend()
     #ax.grid(True, linestyle='--', alpha=0.6)
+
+    param_text = (
+        f"t_ss = {t_ss:.2f}\n"
+        f"t_pp = {t_pp:.2f}\n"
+        f"t_sp: r={r_tsp:.2f}   θ:{t_tsp:.2f} \n"
+        f"t_ps: r={r_tps:.2f}   θ:{t_tps:.2f} \n"
+        f"e_s = {e_s:.2f}\n"
+        f"e_p = {e_p:.2f}"
+    )
+    #        0.75, 0.79
+    fig.text(0.95, 0.14, param_text, fontsize=11, bbox=dict(boxstyle="round", facecolor="white", alpha=0.8))
+    fig.savefig("plot.png", dpi=400, bbox_inches="tight")
 
     write_to_output(f"Fermi-Energie: {E_Fermi:.6f}")
     if t_sp == 0:

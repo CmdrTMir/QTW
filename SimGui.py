@@ -37,76 +37,95 @@ class TabWithMode(ttk.Frame):
             # Parameter-Frame
             param_frame = tk.Frame(self)#, bg="#FAF0E6") # Leder   bg="#FDF5E6" -- Altweiß
             param_frame.pack(fill=tk.X, padx=5, pady=5)
+            row1 = tk.Frame(param_frame)
+            row1.pack(fill=tk.X, pady=2)
             if "N" in param_list: # N Parameter
-                tk.Label(param_frame, text="N: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
+                tk.Label(row1, text="N: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
                 self.N_var = tk.IntVar(value=2)
-                self.N_spin = tk.Spinbox(param_frame, from_=1, to=100, textvariable=self.N_var, font=("Arial", 12), width=5)
+                self.N_spin = tk.Spinbox(row1, from_=1, to=100, textvariable=self.N_var, font=("Arial", 12), width=5)
                 self.N_spin.pack(side=tk.LEFT, padx=5)
             if "t" in param_list: # t Parameter (horizontal)
-                tk.Label(param_frame, text="t: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
+                tk.Label(row1, text="t: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
                 self.t_var = tk.DoubleVar(value=2.0)
-                self.t_spin = tk.Spinbox(param_frame, from_=0.0, to=50.0, increment=0.1, textvariable=self.t_var, font=("Arial", 12), width=8)
+                self.t_spin = tk.Spinbox(row1, from_=0.0, to=50.0, increment=0.1, textvariable=self.t_var, font=("Arial", 12), width=8)
                 self.t_spin.pack(side=tk.LEFT, padx=5)
             if "t_v" in param_list: # vertical t Parameter
-                tk.Label(param_frame, text="t_v: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
+                tk.Label(row1, text="t_v: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
                 self.t_v_var = tk.DoubleVar(value=1.0)
-                self.t_v_spin = tk.Spinbox(param_frame, from_=0.0, to=50.0, increment=0.1, textvariable=self.t_v_var, font=("Arial", 12), width=8)
+                self.t_v_spin = tk.Spinbox(row1, from_=0.0, to=50.0, increment=0.1, textvariable=self.t_v_var, font=("Arial", 12), width=8)
                 self.t_v_spin.pack(side=tk.LEFT, padx=5)
             if "t_d" in param_list: # diagonal t Parameter
-                tk.Label(param_frame, text="t_d: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
+                tk.Label(row1, text="t_d: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
                 self.t_d_var = tk.DoubleVar(value=0)
-                self.t_d_spin = tk.Spinbox(param_frame, from_=0.0, to=50.0, increment=0.1, textvariable=self.t_d_var, font=("Arial", 12), width=8)
+                self.t_d_spin = tk.Spinbox(row1, from_=0.0, to=50.0, increment=0.1, textvariable=self.t_d_var, font=("Arial", 12), width=8)
                 self.t_d_spin.pack(side=tk.LEFT, padx=5)
             if "gamma" in param_list: # gamma Parameter
-                tk.Label(param_frame, text="γ (out): ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
+                tk.Label(row1, text="γ (out): ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
                 self.gamma_var = tk.DoubleVar(value=1.0)
-                self.gamma_spin = tk.Spinbox(param_frame, from_=0.0, to=50.0, increment=0.1, textvariable=self.gamma_var, font=("Arial", 12), width=8)
+                self.gamma_spin = tk.Spinbox(row1, from_=0.0, to=50.0, increment=0.1, textvariable=self.gamma_var, font=("Arial", 12), width=8)
                 self.gamma_spin.pack(side=tk.LEFT, padx=5)
             if "kappa" in param_list: # kappa Parameter
-                tk.Label(param_frame, text="κ (in): ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
+                tk.Label(row1, text="κ (in): ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
                 self.kappa_var = tk.DoubleVar(value=1.0)
-                self.kappa_spin = tk.Spinbox(param_frame, from_=0.0, to=50.0, increment=0.1, textvariable=self.kappa_var, font=("Arial", 12), width=8)
+                self.kappa_spin = tk.Spinbox(row1, from_=0.0, to=50.0, increment=0.1, textvariable=self.kappa_var, font=("Arial", 12), width=8)
                 self.kappa_spin.pack(side=tk.LEFT, padx=5)
             if "d" in param_list: # d Parameter
-                tk.Label(param_frame, text="d: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
+                tk.Label(row1, text="d: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
                 self.d_var = tk.IntVar(value=1)
-                self.d_spin = tk.Spinbox(param_frame, from_=1, to=100, textvariable=self.d_var, font=("Arial", 12), width=5)
+                self.d_spin = tk.Spinbox(row1, from_=1, to=100, textvariable=self.d_var, font=("Arial", 12), width=5)
                 self.d_spin.pack(side=tk.LEFT, padx=5)
             if "tf" in param_list: # tf Parameter
-                tk.Label(param_frame, text="tf: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
+                tk.Label(row1, text="tf: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
                 self.tf_var = tk.IntVar(value=100)
-                self.tf_spin = tk.Spinbox(param_frame, from_=50, to=1000, textvariable=self.tf_var, font=("Arial", 12), width=5)
+                self.tf_spin = tk.Spinbox(row1, from_=50, to=1000, textvariable=self.tf_var, font=("Arial", 12), width=5)
                 self.tf_spin.pack(side=tk.LEFT, padx=5)
             if "k0" in param_list: # k0 Parameter
-                tk.Label(param_frame, text="k0: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
+                tk.Label(row1, text="k0: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
                 self.k0_var = tk.DoubleVar(value=1.5708)
-                self.k0_spin = tk.Spinbox(param_frame, from_=0.0, to=25.0, increment=0.001, textvariable=self.k0_var, font=("Arial", 12), width=8)
+                self.k0_spin = tk.Spinbox(row1, from_=0.0, to=25.0, increment=0.001, textvariable=self.k0_var, font=("Arial", 12), width=8)
                 self.k0_spin.pack(side=tk.LEFT, padx=5)
+            row2 = tk.Frame(param_frame)
+            row2.pack(fill=tk.X, pady=2)
             # Params for 2band model:
             if "t_ss" in param_list:
-                tk.Label(param_frame, text="t_ss: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
+                tk.Label(row1, text="t_ss: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
                 self.tss_var = tk.DoubleVar(value=1.0)
-                self.tss_spin = tk.Spinbox(param_frame, from_=0.0, to=50.0, increment=0.1, textvariable=self.tss_var, font=("Arial", 12), width=8)
+                self.tss_spin = tk.Spinbox(row1, from_=0.0, to=50.0, increment=0.1, textvariable=self.tss_var, font=("Arial", 12), width=8)
                 self.tss_spin.pack(side=tk.LEFT, padx=5)
             if "t_pp" in param_list:
-                tk.Label(param_frame, text="t_pp: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
+                tk.Label(row1, text="t_pp: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
                 self.tpp_var = tk.DoubleVar(value=0.5)
-                self.tpp_spin = tk.Spinbox(param_frame, from_=0.0, to=50.0, increment=0.1, textvariable=self.tpp_var, font=("Arial", 12), width=8)
+                self.tpp_spin = tk.Spinbox(row1, from_=0.0, to=50.0, increment=0.1, textvariable=self.tpp_var, font=("Arial", 12), width=8)
                 self.tpp_spin.pack(side=tk.LEFT, padx=5)
-            if "t_sp" in param_list:
-                tk.Label(param_frame, text="t_sp: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
-                self.tsp_var = tk.DoubleVar(value=0.0)
-                self.tsp_spin = tk.Spinbox(param_frame, from_=0.0, to=50.0, increment=0.1, textvariable=self.tsp_var, font=("Arial", 12), width=8)
-                self.tsp_spin.pack(side=tk.LEFT, padx=5)
+            if "r_tsp" in param_list:
+                tk.Label(row2, text="t_sp (= r*exp(-iθ)): r:", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
+                self.r_tsp_var = tk.DoubleVar(value=0.0)
+                self.r_tsp_spin = tk.Spinbox(row2, from_=0.0, to=50.0, increment=0.1, textvariable=self.r_tsp_var, font=("Arial", 12), width=8)
+                self.r_tsp_spin.pack(side=tk.LEFT, padx=5)
+            if "t_tsp" in param_list:
+                tk.Label(row2, text="θ:", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
+                self.t_tsp_var = tk.DoubleVar(value=0.0)
+                self.t_tsp_spin = tk.Spinbox(row2, from_=0.0, to=50.0, increment=0.1, textvariable=self.t_tsp_var, font=("Arial", 12), width=8)
+                self.t_tsp_spin.pack(side=tk.LEFT, padx=5)
+            if "r_tps" in param_list:
+                tk.Label(row2, text="t_ps (= r*exp(-iθ)): r:", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
+                self.r_tps_var = tk.DoubleVar(value=0.0)
+                self.r_tps_spin = tk.Spinbox(row2, from_=0.0, to=50.0, increment=0.1, textvariable=self.r_tps_var, font=("Arial", 12), width=8)
+                self.r_tps_spin.pack(side=tk.LEFT, padx=5)
+            if "t_tps" in param_list:
+                tk.Label(row2, text="θ:", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
+                self.t_tps_var = tk.DoubleVar(value=0.0)
+                self.t_tps_spin = tk.Spinbox(row2, from_=0.0, to=50.0, increment=0.1, textvariable=self.t_tps_var, font=("Arial", 12), width=8)
+                self.t_tps_spin.pack(side=tk.LEFT, padx=5)
             if "e_s" in param_list:
-                tk.Label(param_frame, text="ε_s: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
+                tk.Label(row1, text="ε_s: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
                 self.es_var = tk.DoubleVar(value=0.0)
-                self.es_spin = tk.Spinbox(param_frame, from_=0.0, to=50.0, increment=0.1, textvariable=self.es_var, font=("Arial", 12), width=8)
+                self.es_spin = tk.Spinbox(row1, from_=0.0, to=50.0, increment=0.1, textvariable=self.es_var, font=("Arial", 12), width=8)
                 self.es_spin.pack(side=tk.LEFT, padx=5)
             if "e_p" in param_list:
-                tk.Label(param_frame, text="ε_p: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
-                self.ep_var = tk.DoubleVar(value=2.0)
-                self.ep_spin = tk.Spinbox(param_frame, from_=0.0, to=50.0, increment=0.1, textvariable=self.ep_var, font=("Arial", 12), width=8)
+                tk.Label(row1, text="ε_p: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
+                self.ep_var = tk.DoubleVar(value=0.0)
+                self.ep_spin = tk.Spinbox(row1, from_=0.0, to=50.0, increment=0.1, textvariable=self.ep_var, font=("Arial", 12), width=8)
                 self.ep_spin.pack(side=tk.LEFT, padx=5)
             self.param_vars = {}
             if hasattr(self, 'N_var'): self.param_vars['N'] = self.N_var
@@ -120,7 +139,10 @@ class TabWithMode(ttk.Frame):
             if hasattr(self, 'k0_var'): self.param_vars['k0'] = self.k0_var
             if hasattr(self, 'tss_var'): self.param_vars['t_ss'] = self.tss_var
             if hasattr(self, 'tpp_var'): self.param_vars['t_pp'] = self.tpp_var
-            if hasattr(self, 'tsp_var'): self.param_vars['t_sp'] = self.tsp_var
+            if hasattr(self, 'r_tsp_var'): self.param_vars['r_tsp'] = self.r_tsp_var
+            if hasattr(self, 't_tsp_var'): self.param_vars['t_tsp'] = self.t_tsp_var
+            if hasattr(self, 'r_tps_var'): self.param_vars['r_tps'] = self.r_tps_var
+            if hasattr(self, 't_tps_var'): self.param_vars['t_tps'] = self.t_tps_var
             if hasattr(self, 'es_var'): self.param_vars['e_s'] = self.es_var
             if hasattr(self, 'ep_var'): self.param_vars['e_p'] = self.ep_var
 
@@ -136,7 +158,7 @@ class TabWithMode(ttk.Frame):
             self.figure, (self.ax1, self.ax2) = plt.subplots(1, 2, figsize=(6, 4))
             self.ax = self.ax1
         else:
-            self.figure, self.ax = plt.subplots(figsize=(7, 6))
+            self.figure, self.ax = plt.subplots(figsize=(5, 5))
         self.canvas = FigureCanvasTkAgg(self.figure, self)
         self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
@@ -232,7 +254,7 @@ class MainApp:
         # Tabs in Gruppe 2
         tab3 = TabWithMode(sub_notebook2, "Natrium", Natrium, None)
         sub_notebook2.add(tab3, text="Natrium")
-        tab3a = TabWithMode(sub_notebook2, "1D2band", twoband_1D, ["t_ss", "t_pp", "t_sp", "e_s", "e_p"])
+        tab3a = TabWithMode(sub_notebook2, "1D2band", twoband_1D, ["t_ss", "t_pp", "r_tsp", "t_tsp", "r_tps", "t_tps", "e_s", "e_p"])
         sub_notebook2.add(tab3a, text="1D2band")
 
         # === Gruppe 3: Tests ===
