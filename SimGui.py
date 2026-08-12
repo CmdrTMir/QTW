@@ -124,7 +124,7 @@ class TabWithMode(ttk.Frame):
                 self.es_spin.pack(side=tk.LEFT, padx=5)
             if "e_p" in param_list:
                 tk.Label(row1, text="ε_p: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
-                self.ep_var = tk.DoubleVar(value=0.0)
+                self.ep_var = tk.DoubleVar(value=2.0)
                 self.ep_spin = tk.Spinbox(row1, from_=0.0, to=50.0, increment=0.1, textvariable=self.ep_var, font=("Arial", 12), width=8)
                 self.ep_spin.pack(side=tk.LEFT, padx=5)
             self.param_vars = {}
