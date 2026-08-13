@@ -158,7 +158,7 @@ class TabWithMode(ttk.Frame):
             self.figure, (self.ax1, self.ax2) = plt.subplots(1, 2, figsize=(6, 4))
             self.ax = self.ax1
         else:
-            self.figure, self.ax = plt.subplots(figsize=(5, 5))
+            self.figure, self.ax = plt.subplots(figsize=(6, 5))
         self.canvas = FigureCanvasTkAgg(self.figure, self)
         self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
