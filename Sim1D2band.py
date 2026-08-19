@@ -28,7 +28,7 @@ def bloch_sphere_coordinates(state):
     return theta, phi
 
 ##### --- New Visualisations: #####
-def plot_combined_visualisations(k_werte, s_band, p_band, V_k_abs, p_band_ref, s_band_ref,
+def plot_combined_visualisations(k_werte, s_band, p_band, V_k_abs, h_k, t_1, t_2, p_band_ref, s_band_ref,
                                  dx_list, dy_list, dz_list,
                                  u_plus_list, u_minus_list, d_hat_list, param_text):
     """
@@ -41,11 +41,11 @@ def plot_combined_visualisations(k_werte, s_band, p_band, V_k_abs, p_band_ref, s
 
     # ---- 1. Bandstruktur (Energie vs. k) (oben links) ----
     ax1 = fig.add_subplot(2, 2, 1)
-    ax1.plot(k_werte, p_band, label='(p)-band', color='red')
-    ax1.plot(k_werte, s_band, label='(s)-band', color='blue')
+    ax1.plot(k_werte, p_band, label='(p)-band', color='#8C368C')
+    ax1.plot(k_werte, s_band, label='(s)-band', color='#00AEB3')
     ax1.plot(k_werte, V_k_abs, label=r'$|V(k)|$', color='#42994B')
-    ax1.plot(k_werte, p_band_ref, color='red', linestyle='--', linewidth=0.8, alpha=0.5)
-    ax1.plot(k_werte, s_band_ref, color='blue', linestyle='--', linewidth=0.8, alpha=0.5)
+    ax1.plot(k_werte, p_band_ref, color='#8C368C', linestyle='--', linewidth=0.8, alpha=0.5)
+    ax1.plot(k_werte, s_band_ref, color='#00AEB3', linestyle='--', linewidth=0.8, alpha=0.5)
     ax1.axhline(y=0.0, color='gray', linestyle='-', linewidth=1.0)
     ax1.axvline(x=0.0, color='gray', linestyle='-', linewidth=1.0)
     ax1.set_xlabel(r'$k$ (wave number)', fontsize=12)
@@ -80,37 +80,58 @@ def plot_combined_visualisations(k_werte, s_band, p_band, V_k_abs, p_band_ref, s
         x = np.sin(theta) * np.cos(phi)
         y = np.sin(theta) * np.sin(phi)
         z = np.cos(theta)
-        ax3.scatter(x, y, z, color='red', s=10, alpha=0.5)
+        ax3.scatter(x, y, z, color='#8C368C', s=10, alpha=0.5)
 
     for u_state in u_minus_list:
         theta, phi = bloch_sphere_coordinates(u_state)
         x = np.sin(theta) * np.cos(phi)
         y = np.sin(theta) * np.sin(phi)
         z = np.cos(theta)
-        ax3.scatter(x, y, z, color='blue', s=10, alpha=0.5)
+        ax3.scatter(x, y, z, color='#00AEB3', s=10, alpha=0.5)
 
     ax3.set_xlabel('$\\langle \\sigma_x \\rangle$')
     ax3.set_ylabel('$\\langle \\sigma_y \\rangle$')
     ax3.set_zlabel('$\\langle \\sigma_z \\rangle$')
-    ax3.set_title('Bloch States on the Bloch Sphere\n(Red = Upper, Blue = Lower)')
+    ax3.set_title('Bloch States on the Bloch Sphere\n(Purple-ish = Upper, Teal = Lower)')
 
+    ## plot hier h(k) in komplexer ebene...
     # ---- 4. d_hat-Pfad auf der Bloch-Kugel (unten rechts) ----
-    ax4 = fig.add_subplot(2, 2, 4, projection='3d')
+    #ax4 = fig.add_subplot(2, 2, 4, projection='3d')
     # Bloch-sphere
-    ax4.plot_surface(bloch_x, bloch_y, bloch_z, color='lightgray', alpha=0.2, edgecolor='none')
+    #ax4.plot_surface(bloch_x, bloch_y, bloch_z, color='lightgray', alpha=0.2, edgecolor='none')
+    #
+    # if d_hat_list:
+    #     d_hat_list = np.array(d_hat_list)
+    #     ax4.plot(d_hat_list[:, 0], d_hat_list[:, 1], d_hat_list[:, 2],
+    #              'b-', linewidth=2, label='$\\hat{\\mathbf{d}}(k)$ path')
+    #
+    # ax4.scatter([0], [0], [1], color='gold', s=30, label='+z (pure $s$)')
+    # ax4.scatter([0], [0], [-1], color='purple', s=30, label='-z (pure $p$)')
+    # ax4.set_xlabel('$\\hat{d}_x$')
+    # ax4.set_ylabel('$\\hat{d}_y$')
+    # ax4.set_zlabel('$\\hat{d}_z$')
+    # ax4.set_title('Path of $\\hat{\\mathbf{d}}(k)$ on the Bloch Sphere')
+    # ax4.legend()
+    # Trajektorie
+    ax4 = fig.add_subplot(2, 2, 4)
+    h_k = np.array(h_k)
+    sc = ax4.scatter(
+        h_k.real,
+        h_k.imag,
+        c=k_werte,
+        cmap="twilight",
+        s=8
+    )
 
-    if d_hat_list:
-        d_hat_list = np.array(d_hat_list)
-        ax4.plot(d_hat_list[:, 0], d_hat_list[:, 1], d_hat_list[:, 2],
-                 'b-', linewidth=2, label='$\\hat{\\mathbf{d}}(k)$ path')
+    ax4.axhline(0, color="black", lw=0.7)
+    ax4.axvline(0, color="black", lw=0.7)
+    ax4.set_xlabel(r"$\mathrm{Re}\,h_{sp}(k)$")
+    ax4.set_ylabel(r"$\mathrm{Im}\,h_{sp}(k)$")
+    ax4.set_title(r"Trajektorie von $h_{sp}(k)$")
+    ax4.set_aspect("equal")
+    cbar = fig.colorbar(sc, ax=ax4)
+    cbar.set_label(r"$k$")
 
-    ax4.scatter([0], [0], [1], color='gold', s=30, label='+z (pure $s$)')
-    ax4.scatter([0], [0], [-1], color='purple', s=30, label='-z (pure $p$)')
-    ax4.set_xlabel('$\\hat{d}_x$')
-    ax4.set_ylabel('$\\hat{d}_y$')
-    ax4.set_zlabel('$\\hat{d}_z$')
-    ax4.set_title('Path of $\\hat{\\mathbf{d}}(k)$ on the Bloch Sphere')
-    ax4.legend()
 
     #plt.tight_layout()
     fig.subplots_adjust(
@@ -124,7 +145,7 @@ def plot_combined_visualisations(k_werte, s_band, p_band, V_k_abs, p_band_ref, s
     fig.canvas.manager.set_window_title('Combined visualisations')
     plt.draw()
     plt.pause(0.001)
-    fig.savefig("combined_vis.png", dpi=400)#, bbox_inches="")
+    fig.savefig("combined_vis.png", dpi=400)
 
 #####################################################################################################################
 def twoband_1D(ax, write_to_output, params):
@@ -151,6 +172,10 @@ def twoband_1D(ax, write_to_output, params):
     t_ps = r_tps * math.e**(-1j*t_tps)
     write_to_output(f't_sp: {t_sp}')
     write_to_output(f't_ps: {t_ps}')
+    t_1 = (t_sp + t_ps) / 2
+    t_2 = (t_sp - t_ps) / 2
+    write_to_output(f't_1 (mean): \t {t_1}')
+    write_to_output(f't_2 (half diff): \t {t_2}')
 
     k_werte = np.linspace(-np.pi/a, np.pi/a, ks)
 
@@ -158,6 +183,7 @@ def twoband_1D(ax, write_to_output, params):
     p_band = []
     bandlücke_k = []
     V_k_abs = []
+    h_k = []
     evs_minus = []
     evs_plus = []
     T = np.array([[t_ss, t_sp],
@@ -190,6 +216,7 @@ def twoband_1D(ax, write_to_output, params):
         s_band.append(E_minus)
         bandlücke_k.append(E_plus - E_minus)
         V_k_abs.append(abs(h_sp))
+        h_k.append(h_sp)
         dx_list.append(np.real(h_sp))
         dy_list.append(-np.imag(h_sp))
         dz_list.append(dz)
@@ -239,26 +266,24 @@ def twoband_1D(ax, write_to_output, params):
 
     ### --- Plot ---
     fig = ax.figure
-    ax.plot(k_werte, p_band, label='(p)-band', color='red')
-    ax.plot(k_werte, s_band, label='(s)-band', color='blue')
+    ax.plot(k_werte, p_band, label='(p)-band', color='#8C368C')
+    ax.plot(k_werte, s_band, label='(s)-band', color='#00AEB3')
     ax.plot(k_werte, V_k_abs, label=r'$|V(k)|$', color='#42994B')
     #ax.axhline(y=e_s, color='orange', linestyle=':', linewidth=1.0, alpha=0.7)
     #ax.axhline(y=e_p, color='orange', linestyle=':', linewidth=1.0, alpha=0.7)
-    ax.plot(k_werte, p_band_ref, color='red', linestyle='--', linewidth=0.8, alpha=0.5)
-    ax.plot(k_werte, s_band_ref, color='blue', linestyle='--', linewidth=0.8, alpha=0.5)
+    ax.plot(k_werte, p_band_ref, color='#8C368C', linestyle='--', linewidth=0.8, alpha=0.5)
+    ax.plot(k_werte, s_band_ref, color='#00AEB3', linestyle='--', linewidth=0.8, alpha=0.5)
     ax.axhline(y=0.0, color='gray', linestyle='-', linewidth=1.0)
     ax.axvline(x=0.0, color='gray', linestyle='-', linewidth=1.0)
 
     if t_sp != 0:
-        ax.fill_between(k_werte, s_band, p_band, color='gray', alpha=0.2, label='band gap')
+        ax.fill_between(k_werte, max(s_band), min(p_band), color='gray', alpha=0.2, label='band gap')
         #ax.vlines(x=k_min, ymin=s_band[idx_min], ymax=p_band[idx_min], color='black', linestyle='--', linewidth=1)
         #ax.vlines(x=-k_min, ymin=s_band[idx_min], ymax=p_band[idx_min], color='black', linestyle='--', linewidth=1)
         write_to_output(f"Minimale Bandlücke: {min_gap:.6f} bei k = {k_min:.4f}")
 
     ax.set_xlabel(r'$k$ (wave number)', fontsize=12)
     ax.set_ylabel(r'$E(k)$', fontsize=12)
-    #ax.lengend()
-    ax.legend(loc='center left', bbox_to_anchor=(1.045, 0.5))
     param_text = (
         f"t_ss = {t_ss:.2f}\n"
         f"t_pp = {t_pp:.2f}\n"
@@ -269,21 +294,16 @@ def twoband_1D(ax, write_to_output, params):
         f"e_s = {e_s:.2f}\n"
         f"e_p = {e_p:.2f}"
     )
-    for t in fig.texts:
-        t.remove()
-    #        0.75, 0.79
-    fig.text(0.95, 0.14, param_text, fontsize=12, bbox=dict(boxstyle="round", facecolor="white", alpha=0.8))
-    #fig.savefig("plot.png", dpi=400, bbox_inches="standard")
+    dummy_line = ax.plot([], [], ' ', label=param_text)[0]
+    ax.legend(loc='center left', bbox_to_anchor=(1.045, 0.5))
+    fig.savefig("plot.png", dpi=400, bbox_inches="tight")
 
     # execute new plots:
-    plot_combined_visualisations(k_werte, s_band, p_band, V_k_abs, p_band_ref, s_band_ref,
+    plot_combined_visualisations(k_werte, s_band, p_band, V_k_abs, h_k, t_1, t_2, p_band_ref, s_band_ref,
                                  dx_list, dy_list, dz_list,
                                  evs_plus, evs_minus, d_hat_list, param_text)
     plt.pause(0.1)
 
-    ##### TODO: https://en.wikipedia.org/wiki/Periodic_table_of_topological_insulators_and_topological_superconductors
-    ##### TODO: https://www.youtube.com/watch?v=tdq4TYOyTXk
-    ##### TODO: do the beamer again, and write everything down for me to understand
 
     #Code-Schrottplatz:
     #H_00 = e_s + 2 * t_ss * math.cos(k*a)

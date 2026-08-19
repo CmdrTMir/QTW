@@ -90,32 +90,32 @@ class TabWithMode(ttk.Frame):
             if "t_ss" in param_list:
                 tk.Label(row1, text="t_ss: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
                 self.tss_var = tk.DoubleVar(value=1.0)
-                self.tss_spin = tk.Spinbox(row1, from_=0.0, to=50.0, increment=0.1, textvariable=self.tss_var, font=("Arial", 12), width=8)
+                self.tss_spin = tk.Spinbox(row1, from_=-50.0, to=50.0, increment=0.1, textvariable=self.tss_var, font=("Arial", 12), width=8)
                 self.tss_spin.pack(side=tk.LEFT, padx=5)
             if "t_pp" in param_list:
                 tk.Label(row1, text="t_pp: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
                 self.tpp_var = tk.DoubleVar(value=0.5)
-                self.tpp_spin = tk.Spinbox(row1, from_=0.0, to=50.0, increment=0.1, textvariable=self.tpp_var, font=("Arial", 12), width=8)
+                self.tpp_spin = tk.Spinbox(row1, from_=-50.0, to=50.0, increment=0.1, textvariable=self.tpp_var, font=("Arial", 12), width=8)
                 self.tpp_spin.pack(side=tk.LEFT, padx=5)
             if "r_tsp" in param_list:
                 tk.Label(row2, text="t_sp (= r*exp(-iθ)): r:", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
                 self.r_tsp_var = tk.DoubleVar(value=0.0)
-                self.r_tsp_spin = tk.Spinbox(row2, from_=0.0, to=50.0, increment=0.1, textvariable=self.r_tsp_var, font=("Arial", 12), width=8)
+                self.r_tsp_spin = tk.Spinbox(row2, from_=-50.0, to=50.0, increment=0.1, textvariable=self.r_tsp_var, font=("Arial", 12), width=8)
                 self.r_tsp_spin.pack(side=tk.LEFT, padx=5)
             if "t_tsp" in param_list:
                 tk.Label(row2, text="θ:", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
                 self.t_tsp_var = tk.DoubleVar(value=0.0)
-                self.t_tsp_spin = tk.Spinbox(row2, from_=0.0, to=50.0, increment=0.1, textvariable=self.t_tsp_var, font=("Arial", 12), width=8)
+                self.t_tsp_spin = tk.Spinbox(row2, from_=-50.0, to=50.0, increment=0.1, textvariable=self.t_tsp_var, font=("Arial", 12), width=8)
                 self.t_tsp_spin.pack(side=tk.LEFT, padx=5)
             if "r_tps" in param_list:
                 tk.Label(row2, text="t_ps (= r*exp(-iθ)): r:", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
                 self.r_tps_var = tk.DoubleVar(value=0.0)
-                self.r_tps_spin = tk.Spinbox(row2, from_=0.0, to=50.0, increment=0.1, textvariable=self.r_tps_var, font=("Arial", 12), width=8)
+                self.r_tps_spin = tk.Spinbox(row2, from_=-50.0, to=50.0, increment=0.1, textvariable=self.r_tps_var, font=("Arial", 12), width=8)
                 self.r_tps_spin.pack(side=tk.LEFT, padx=5)
             if "t_tps" in param_list:
                 tk.Label(row2, text="θ:", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
                 self.t_tps_var = tk.DoubleVar(value=0.0)
-                self.t_tps_spin = tk.Spinbox(row2, from_=0.0, to=50.0, increment=0.1, textvariable=self.t_tps_var, font=("Arial", 12), width=8)
+                self.t_tps_spin = tk.Spinbox(row2, from_=-50.0, to=50.0, increment=0.1, textvariable=self.t_tps_var, font=("Arial", 12), width=8)
                 self.t_tps_spin.pack(side=tk.LEFT, padx=5)
             if "e_s" in param_list:
                 tk.Label(row1, text="ε_s: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
