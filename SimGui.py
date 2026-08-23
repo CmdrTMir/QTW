@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
 
-from SimNatrium import Natrium
+#from SimNatrium import Natrium
 from SimLindblad import lindblad
 from SimLindbladT import T_lindblad
 from SimQutipLMEq import qutip_lindblad
@@ -252,8 +252,8 @@ class MainApp:
         sub_notebook2.pack(fill=tk.BOTH, expand=True)
 
         # Tabs in Gruppe 2
-        tab3 = TabWithMode(sub_notebook2, "Natrium", Natrium, None)
-        sub_notebook2.add(tab3, text="Natrium")
+        #tab3 = TabWithMode(sub_notebook2, "Natrium", Natrium, None)
+        #sub_notebook2.add(tab3, text="Natrium")
         tab3a = TabWithMode(sub_notebook2, "1D2band", twoband_1D, ["t_ss", "t_pp", "r_tsp", "t_tsp", "r_tps", "t_tps", "e_s", "e_p"])
         sub_notebook2.add(tab3a, text="1D2band")
 
