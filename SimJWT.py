@@ -57,7 +57,7 @@ def create_JWT_t(N, t):
     return c, c_dag, H
 
 # with T matrix
-def create_JWT_T(N, t, d_val):
+def create_JWT_T(N, t, d_val, write_to_output):
     H = 0
     c, c_dag = cs(N)
 
@@ -79,6 +79,8 @@ def create_JWT_T(N, t, d_val):
     # T = np.round(T_raw, 2)
     # T[T < 1e-3] = 0.0
     # print(T)
+    write_to_output("Variable t meaning not tight-binding")
+    write_to_output(f"T-matrix: \n {T}")
 
 
     # berechne H

@@ -30,8 +30,8 @@ def dimRed_2D(ax, write_to_output, params):
 
     # New calculation for H and c's
     if int(np.sqrt(N))**2 != N:
-        write_to_output(f"FEHLER: N = {N} ist keine Quadratzahl. Es muss n^2 = N gelten.", "#CD2626")
-        raise ValueError(f"N = {N} ist keine Quadratzahl. Es muss n^2 = N gelten.")
+        write_to_output(f"ERROR: N = {N} isn't a square number. Make sure that n^2 = N.", "#CD2626")
+        #raise ValueError(f"N = {N} ist keine Quadratzahl. Es muss n^2 = N gelten.")
     n = int(math.sqrt(N))
 
     write_to_output(f'The parameters are set to:    in: {kappa:.3f};  out: {gamma:.2f}')
@@ -171,11 +171,11 @@ def dimRed_2D(ax, write_to_output, params):
          #diff_N = abs(current_n_N - n_N_theo)
 
         if count == 5:
-            write_to_output(f"Steady State erreicht als Delta bei t={t0:.2f}")
+            write_to_output(f"Steady State reached as delta at t={t0:.2f}")
             write_to_output(f"deltas remaining: eps={eps_delta}" + "\n"
                         + f"delta_1: {delta_1:.10f}" + "\n"
                         + f"delta_j: {delta_j:.10f}" + "\n"
-                        + f"delta_N: {delta_N:.10f}" + "\n")
+                        + f"delta_N: {delta_N:.10f}")
             ss_delta = True
             break
 
@@ -189,8 +189,8 @@ def dimRed_2D(ax, write_to_output, params):
     end_solve = time.perf_counter()
     write_to_output(f'Solving took {(end_solve - start_solve):.4f} s')
     if not ss_delta:
-        write_to_output(f"WARNUNG: tf={tf} erreicht, aber Steady State wurde nicht erreicht.", "#CD2626")
-        write_to_output("Erhöhen Sie 'tf' in den Parametern.")
+        write_to_output(f"WARNING: tf={tf} reached, but Steady State couldn't be reached.", "#CD2626")
+        write_to_output("Increase 'tf' parameter.")
 
     steady_state = [ew_listen[site][-1] for site in range(1, N+1)]
     # Plot:
@@ -237,7 +237,7 @@ def dimRed_2D(ax, write_to_output, params):
     fig = ax.figure
     fig.colorbar(scatter, ax=ax, label='Expectation Value Density')
 
-    ax.set_title('Steady-State Dichteverteilung')
+    ax.set_title('Steady-state density distribution')
     ax.set_xticks(np.arange(n))
     ax.set_xticklabels(np.arange(0, n))
     ax.set_yticks(np.arange(n))

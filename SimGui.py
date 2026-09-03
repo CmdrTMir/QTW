@@ -41,7 +41,7 @@ class TabWithMode(ttk.Frame):
             row1.pack(fill=tk.X, pady=2)
             if "N" in param_list: # N Parameter
                 tk.Label(row1, text="N: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
-                self.N_var = tk.IntVar(value=2)
+                self.N_var = tk.IntVar(value=4)
                 self.N_spin = tk.Spinbox(row1, from_=1, to=100, textvariable=self.N_var, font=("Arial", 12), width=5)
                 self.N_spin.pack(side=tk.LEFT, padx=5)
             if "t" in param_list: # t Parameter (horizontal)
@@ -149,10 +149,11 @@ class TabWithMode(ttk.Frame):
         # Buttons zum Ausführen
         button_frame = tk.Frame(self)
         button_frame.pack(pady=5)
-        self.run_button = tk.Button(button_frame, text="Ausführen", font=("Arial", 11, "bold"), command=self.execute_script)
+        self.run_button = tk.Button(button_frame, text="Run Script", font=("Arial", 11, "bold"), fg="#000080", command=self.execute_script)
         self.run_button.pack(side=tk.LEFT, padx=5)
-        self.steady_button = tk.Button(button_frame, text="Steady State", font=("Arial", 11, "bold"), command=self.execute_steady_state)
-        self.steady_button.pack(side=tk.LEFT, padx=5)
+        if param_list and "steady" in param_list:
+            self.steady_button = tk.Button(button_frame, text="Steady State", font=("Arial", 11, "bold"), command=self.execute_steady_state)
+            self.steady_button.pack(side=tk.LEFT, padx=5)
 
         if n_axes == 2:
             self.figure, (self.ax1, self.ax2) = plt.subplots(1, 2, figsize=(6, 4))
@@ -171,13 +172,11 @@ class TabWithMode(ttk.Frame):
         self.ax.clear()
         if self.n_axes == 2:
             self.ax2.clear()
-            self.ax.text(0.5, 0.5, "Noch nichts ausgeführt\nKlicken Sie auf 'Ausführen'",
-                        ha='center', va='center', fontsize=12, alpha=0.5)
+            self.ax.text(0.5, 0.5, "Nothing to show yet \n Click 'Run'", ha='center', va='center', fontsize=12, alpha=0.5)
             self.ax.set_xlim(0,1); self.ax.set_ylim(0,1); self.ax.axis('off')
             self.ax2.set_xlim(0,1); self.ax2.set_ylim(0,1); self.ax2.axis('off')
 
-        self.ax.text(0.5, 0.5, "Noch nichts ausgeführt\nKlicken Sie auf 'Ausführen'",
-                        ha='center', va='center', fontsize=12, alpha=0.5)
+        self.ax.text(0.5, 0.5, "Nothing to show yet \n Click 'Run'", ha='center', va='center', fontsize=12, alpha=0.5)
         self.ax.set_xlim(0,1); self.ax.set_ylim(0,1); self.ax.axis('off')
         self.canvas.draw()
 
@@ -236,13 +235,13 @@ class MainApp:
         sub_notebook1.pack(fill=tk.BOTH, expand=True)
 
         # Tabs in Gruppe 1
-        tab1 = TabWithMode(sub_notebook1, "Lindblad", lindblad, ["N", "t", "gamma"])
+        tab1 = TabWithMode(sub_notebook1, "Lindblad", lindblad, ["N", "t", "gamma", "steady"])
         sub_notebook1.add(tab1, text="Lindblad")
-        tab2 = TabWithMode(sub_notebook1, "variable T", T_lindblad, ["N", "t", "gamma", "d"])
+        tab2 = TabWithMode(sub_notebook1, "variable T", T_lindblad, ["N", "t", "gamma", "d", "steady"])
         sub_notebook1.add(tab2, text="variable T")
-        tab6 = TabWithMode(sub_notebook1, "Qutip LMEq", qutip_lindblad, ["N", "t", "gamma"])
+        tab6 = TabWithMode(sub_notebook1, "Qutip LMEq", qutip_lindblad, ["N", "t", "gamma", "steady"])
         sub_notebook1.add(tab6, text="Qutip LMEq")
-        tab7 = TabWithMode(sub_notebook1, "SingleExcitation", single_excitation, ["N", "t", "gamma", "kappa", "tf"])
+        tab7 = TabWithMode(sub_notebook1, "SingleExcitation", single_excitation, ["N", "t", "gamma", "kappa", "tf", "steady"])
         sub_notebook1.add(tab7, text="SingleExcitation")
 
         # === Gruppe 2: 2-BandModels ===
@@ -277,8 +276,8 @@ class MainApp:
         #Tabs in Gruppe 4
         tab8 = TabWithMode(sub_notebook4, "DimReduction", dim_reduction, ["N"])
         sub_notebook4.add(tab8, text="DimReduction")
-        tab9 = TabWithMode(sub_notebook4, "Kette zu 2D", chain_to_2D, ["N"])
-        sub_notebook4.add(tab9, text="Kette zu 2D")
+        tab9 = TabWithMode(sub_notebook4, "Chain-2D", chain_to_2D, ["N"])
+        sub_notebook4.add(tab9, text="Chain-2D")
         tab10 = TabWithMode(sub_notebook4, "2D", dimRed_2D, ["N", "t", "t_v", "tf"])
         sub_notebook4.add(tab10, text="2D")
         tab12 = TabWithMode(sub_notebook4, "eigenvals_2D", eigenvals_2D, ["N", "t", "t_v", "t_d"], n_axes=2) # <- 2 plots

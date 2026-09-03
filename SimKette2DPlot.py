@@ -80,9 +80,9 @@ def chain_to_2D(ax, write_to_output, params):
     tf = 2 * tau
 
     write_to_output(f'tau: {tau:.2f}')
-    write_to_output(f'n_1 analytischer Wert: {n_1_theo:.6f} ')
-    write_to_output(f'n_j analytischer Wert: {n_j_theo:.6f} ')
-    write_to_output(f'n_N analytischer Wert: {n_N_theo:.6f} ')
+    write_to_output(f'n_1 analytical value: {n_1_theo:.6f} ')
+    write_to_output(f'n_j analytical value: {n_j_theo:.6f} ')
+    write_to_output(f'n_N analytical value: {n_N_theo:.6f} ')
 
     ss_reached = False
     ss_delta = False
@@ -154,20 +154,20 @@ def chain_to_2D(ax, write_to_output, params):
         diff_N = abs(current_n_N - n_N_theo)
 
         if count == 5:
-            write_to_output(f"Steady State erreicht als Delta bei t={t0:.2f}")
+            write_to_output(f"Steady State reached as delta at t={t0:.2f}")
             write_to_output(f"deltas remaining: eps={eps_delta}" + "\n"
                         + f"delta_1: {delta_1:.10f}" + "\n"
                         + f"delta_j: {delta_j:.10f}" + "\n"
-                        + f"delta_N: {delta_N:.10f}" + "\n")
-            write_to_output(f"Aktuelle Besetzungen weichen noch um" + "\n"
+                        + f"delta_N: {delta_N:.10f}")
+            write_to_output(f"Current occupations still differ by" + "\n"
                         + f"diff_1: {diff_1:.6f}" + "\n"
                         + f"diff_j: {diff_j:.6f}" + "\n"
-                        + f"diff_N: {diff_N:.6f} ab." + "\n")
+                        + f"diff_N: {diff_N:.6f}" + "\n")
             ss_delta = True
             break
 
         if diff_1 < eps_diff and diff_N < eps_diff and diff_j < eps_diff:
-            write_to_output(f"Steady State erreicht durch eps={eps_diff} bei t={t0:.2f}")
+            write_to_output(f"Steady State reached via eps={eps_diff} bei t={t0:.2f}")
             ss_reached = True
             break
     ###############################################################
@@ -176,17 +176,17 @@ def chain_to_2D(ax, write_to_output, params):
     end_solve = time.perf_counter()
     write_to_output(f'Solving took {(end_solve - start_solve):.4f} s', "#228B22")
     if not ss_reached and not ss_delta:
-        write_to_output(f"WARNUNG: tf={tf} erreicht, aber Steady State wurde nicht erreicht.", "#CD2626")
-        write_to_output(f"Aktuelle Besetzungen weichen numerisch um" + "\n"
+        write_to_output(f"WARNING: tf={tf} reached, but Steady State couldn't be reached.", "#CD2626")
+        write_to_output(f"Current occupations still differ by" + "\n"
                         + f"diff_1: {diff_1:.6f}" + "\n"
                         + f"diff_j: {diff_j:.6f}" + "\n"
                         + f"diff_N: {diff_N:.6f}" + "\n"
-                        + "von den analytischen Werten ab.", "#CD2626")
+                        + "from the analytical values.", "#CD2626")
 
     steady_state = [ew_listen[site][-1] for site in range(1, N+1)]
     # Plot:
     if int(np.sqrt(N))**2 != N:
-        raise ValueError(f"N = {N} ist keine Quadratzahl. Es muss n^2 = N gelten.")
+        raise ValueError(f"N = {N} isn't a square number. Make sure that n^2 = N.")
     n = int(math.sqrt(N))
     grid = np.zeros((n, n))
 
@@ -235,9 +235,9 @@ def chain_to_2D(ax, write_to_output, params):
 
     # Colorbar
     fig = ax.figure
-    fig.colorbar(scatter, ax=ax, label='Dichte (steady state)')
+    fig.colorbar(scatter, ax=ax, label='Density (steady state)')
 
-    ax.set_title('Steady-State Dichteverteilung (Schlangen-Mapping)')
+    ax.set_title('Steady-state density distribution (Chain-2D-mapping)')
     ax.set_xticks(np.arange(n))
     ax.set_xticklabels(np.arange(0, n))
     ax.set_yticks(np.arange(n))

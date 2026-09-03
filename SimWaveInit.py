@@ -137,7 +137,7 @@ def wave_init(ax, write_to_output, params):
     end_solve = time.perf_counter()
     write_to_output(f'Computing took {(end_solve - start_solve):.4f} s', "#228B22")
     if not packet_out:
-        write_to_output(f"WARNUNG: tf={tf} erreicht, aber das Wellenpaket ist noch nicht aus dem System herausgewandert.", "#CD2626")
+        write_to_output(f"WARNING: tf={tf} reached, but the wave packet isn't completely out of the system yet.", "#CD2626")
     write_to_output(f'Probability is at: {prob:.4f}')
 
     # Plot:

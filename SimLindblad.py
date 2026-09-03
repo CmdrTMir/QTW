@@ -79,11 +79,13 @@ def lindblad_time(ax, write_to_output, params):
     ax.set_ylim(0, 1.1)
     ax.set_xlim(0, plot_len+1)
 
-    ax.set_xlabel('Zeit')
+    ax.set_xlabel('Time')
     ax.set_ylabel(r'$\langle n_j \rangle$')
-    ax.set_title(f'Besetzungszahlen für N={N} Sites')
+    ax.set_title(f'Occupation number for N={N} Sites')
     ax.legend(['Site 1', 'Site N'])
     ax.text(6.1, 0.01, f'Solving took {(end_solve - start_solve):.4f} s')
+
+    #ax.figure.savefig("plotLindblad1.png", dpi=400, bbox_inches="tight")
 
     steady_state = [ew_listen[site][-1] for site in range(N)]
     ss_values = steady_state
@@ -113,8 +115,10 @@ def lindblad_ss(ax, write_to_output, params):
     ax.bar(range(1, N+1), steady_values)
     ax.set_xticks(range(1, N+1))
     ax.set_xlabel("Site")
-    ax.set_ylabel("Besetzungszahl")
+    ax.set_ylabel("Occupation number")
     ax.set_title("Steady State")
+
+    ax.figure.savefig("plotLindbladSS.png", dpi=400, bbox_inches="tight")
 
 
 def lindblad(ax, write_to_output, params):
