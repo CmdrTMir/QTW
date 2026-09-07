@@ -16,6 +16,7 @@ from Sim2D import dimRed_2D
 from Sim2DAni import ani_2D
 from SimEigenvals2D import eigenvals_2D
 from Sim1D2band import twoband_1D
+from Sim2D2band import twoband_2D
 from SimWaveInit import wave_init
 from SimWaveOmega import wave_omega
 
@@ -255,6 +256,8 @@ class MainApp:
         #sub_notebook2.add(tab3, text="Natrium")
         tab3a = TabWithMode(sub_notebook2, "1D2band", twoband_1D, ["t_ss", "t_pp", "r_tsp", "t_tsp", "r_tps", "t_tps", "e_s", "e_p"])
         sub_notebook2.add(tab3a, text="1D2band")
+        tab3b = TabWithMode(sub_notebook2, "2D2band", twoband_2D, ["N", "t"])
+        sub_notebook2.add(tab3b, text="2D2band")
 
         # === Gruppe 3: Tests ===
         group3_frame = ttk.Frame(self.notebook)
