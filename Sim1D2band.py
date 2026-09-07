@@ -149,12 +149,12 @@ def plot_combined_visualisations(k_werte, s_band, p_band, V_k_abs, h_k, t_1, t_2
 
 #####################################################################################################################
 def twoband_1D(ax, write_to_output, params):
-    write_to_output(f"Offene Figuren vor dem Plot: {plt.get_fignums()}")
+    write_to_output(f"Offene Figuren vor dem Plot: {plt.get_fignums()}", "#fbcf2b")
     for fig_num in plt.get_fignums():
         fig = plt.figure(fig_num)
         if fig is not ax.figure:  # GUI-Figure nicht schließen
             plt.close(fig)
-    write_to_output(f"Offene Figuren nach dem Löschen: {plt.get_fignums()}")
+    write_to_output(f"Offene Figuren nach dem Löschen: {plt.get_fignums()}", "#fbcf2b")
     # ---- variables ----
     t_ss = params.get("t_ss", 1.0)
     t_pp = params.get("t_pp", 1.0)

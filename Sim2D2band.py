@@ -128,12 +128,12 @@ def plot_combined_visualisations(k_x_werte, k_y_werte, s_band, p_band, d_vecs):
 
 
 def twoband_2D(ax, write_to_output, params):
-    write_to_output(f"Offene Figuren vor dem Plot: {plt.get_fignums()}")
+    write_to_output(f"Offene Figuren vor dem Plot: {plt.get_fignums()}", "#fbcf2b")
     for fig_num in plt.get_fignums():
         fig = plt.figure(fig_num)
         if fig is not ax.figure:  # GUI-Figure nicht schließen
             plt.close(fig)
-    write_to_output(f"Offene Figuren nach dem Löschen: {plt.get_fignums()}")
+    write_to_output(f"Offene Figuren nach dem Löschen: {plt.get_fignums()}", "#fbcf2b")
     # ---- Variablen ----
     N = params.get("N", 9)
     t = params.get("t", 2)
@@ -169,7 +169,8 @@ def twoband_2D(ax, write_to_output, params):
 
     ### --- Plot --- stimmt irgendwas nicht...
     fig = ax.figure
-    ax_dummy = fig.add_subplot(2, 2, 4, projection='3d')
+    fig.clear()
+    ax_dummy = fig.add_subplot(projection='3d')
     KX, KY = np.meshgrid(k_x_werte, k_y_werte, indexing='ij')
     Z = np.sin(KX) * np.cos(KY)
     ax_dummy.plot_surface(

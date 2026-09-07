@@ -173,8 +173,7 @@ class TabWithMode(ttk.Frame):
         self.ax.clear()
         if self.n_axes == 2:
             self.ax2.clear()
-            self.ax.text(0.5, 0.5, "Nothing to show yet \n Click 'Run'", ha='center', va='center', fontsize=12, alpha=0.5)
-            self.ax.set_xlim(0,1); self.ax.set_ylim(0,1); self.ax.axis('off')
+            self.ax2.text(0.5, 0.5, "Nothing to show yet \n Click 'Run'", ha='center', va='center', fontsize=12, alpha=0.5)
             self.ax2.set_xlim(0,1); self.ax2.set_ylim(0,1); self.ax2.axis('off')
 
         self.ax.text(0.5, 0.5, "Nothing to show yet \n Click 'Run'", ha='center', va='center', fontsize=12, alpha=0.5)
@@ -188,9 +187,13 @@ class TabWithMode(ttk.Frame):
         self.output_text.see(tk.END)
 
     def execute_script(self):
+        self.figure.clear()
         if self.n_axes == 2:
-            self.ax2.clear()
-        self.ax.clear()
+            self.ax1 = self.figure.add_subplot(1, 2, 1)
+            self.ax2 = self.figure.add_subplot(1, 2, 2)
+            self.ax = self.ax1
+        else:
+            self.ax = self.figure.add_subplot(111)
         self.output_text.delete(1.0, tk.END)
         if hasattr(self, 'param_vars'):
             params = {name: var.get() for name, var in self.param_vars.items()}

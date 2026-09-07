@@ -208,13 +208,10 @@ def chain_to_2D(ax, write_to_output, params):
     y_flat = Y.flatten()
     densities = grid.flatten()
 
-    # Achtung: density könnte 0 sein, dann size=10 (Mindestgröße)
-    sizes = 100 * densities + 10
-
     # Scatter-Plot
     scatter = ax.scatter(
         x_flat, y_flat,
-        s=sizes,
+        s=200,
         c=densities,
         cmap='hot',
         alpha=0.8,
@@ -235,7 +232,7 @@ def chain_to_2D(ax, write_to_output, params):
 
     # Colorbar
     fig = ax.figure
-    fig.colorbar(scatter, ax=ax, label='Density (steady state)')
+    fig.colorbar(scatter, ax=ax, label="Density (steady state)")
 
     ax.set_title('Steady-state density distribution (Chain-2D-mapping)')
     ax.set_xticks(np.arange(n))
