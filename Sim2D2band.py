@@ -8,6 +8,7 @@ import time
 import math
 
 ks = 200
+N = 10
 
 ##### --- New Visualisations: #####
 def plot_combined_visualisations(k_x_werte, k_y_werte, s_band, p_band, d_vecs):
@@ -125,6 +126,10 @@ def plot_combined_visualisations(k_x_werte, k_y_werte, s_band, p_band, d_vecs):
     plt.draw()
     plt.pause(0.001)
 
+####################################################################################################################
+# Hilfsfunktion: Berechnet den Startindex für die 2x2 Blockmatrix eines Gitterplatzes
+def site_idx(m, n):
+    return 2 * (m * N + n)
 
 
 def twoband_2D(ax, write_to_output, params):
@@ -135,16 +140,17 @@ def twoband_2D(ax, write_to_output, params):
             plt.close(fig)
     write_to_output(f"Offene Figuren nach dem Löschen: {plt.get_fignums()}", "#fbcf2b")
     # ---- Variablen ----
-    N = params.get("N", 9)
+    #N = 10 #params.get("N", 10)
     t = params.get("t", 2)
     #tf = params.get("tf", 100)
     a = 1.0
 
+    write_to_output("This is a 10x10 example!")
     # New calculation for H and c's
-    if int(np.sqrt(N))**2 != N:
-        write_to_output(f"ERROR: N = {N} isn't a square number. Make sure that n^2 = N.", "#CD2626")
+    #if int(np.sqrt(N))**2 != N:
+        #write_to_output(f"ERROR: N = {N} isn't a square number. Make sure that n^2 = N.", "#CD2626")
         #raise ValueError(f"N = {N} ist keine Quadratzahl. Es muss n^2 = N gelten.")
-    n = int(math.sqrt(N))
+    #n = int(math.sqrt(N))
 
     # Energie
     k_x_werte = np.linspace(-np.pi/a, np.pi/a, ks)
@@ -167,7 +173,69 @@ def twoband_2D(ax, write_to_output, params):
             d_vecs.append(d_vec)
 
 
-    ### --- Plot --- stimmt irgendwas nicht...
+    dim = 2 * N * N
+    H = np.zeros((dim, dim), dtype=complex)
+    M  = np.array([[0, 0], [0, 4*t]])
+    Tx = np.array([[t, 1j*t], [1j*t, -t]])
+    Ty = np.array([[t, t], [-t, -t]])
+
+    for m in range(N):
+        for n in range(N):
+            i = site_idx(m, n)
+            # 1. On-site Term (M)
+            H[i:i+2, i:i+2] += M
+            # 2. Hopping in x-Richtung (Tx)
+            if m + 1 < N: #Nx
+                j = site_idx(m + 1, n)
+                H[j:j+2, i:i+2] -= Tx
+                H[i:i+2, j:j+2] -= Tx.conj().T
+            # 3. Hopping in y-Richtung (Ty)
+            if n + 1 < N: #Ny
+                k = site_idx(m, n + 1)
+                H[k:k+2, i:i+2] -= Ty
+                H[i:i+2, k:k+2] -= Ty.conj().T
+
+    write_to_output(f"Hamiltonian Dimension: {H.shape}")
+    write_to_output(f"Ist H hermitesch? {np.allclose(H, H.conj().T)}")
+
+    eigvalues, eigvectors = eigh(H)
+    edge_masking = (eigvalues > 0) & (eigvalues < 4 * t)
+    edge_indices = np.where(edge_masking)[0]
+
+    hbar = 1
+    E0 = 2 * t
+    sigma_E = 0.3 * t
+    x0 = 0
+    k_alpha = 0
+    # evtl noch ändern und in die GUI als Eingabe?
+    T_max = 50.0 # Etwas mehr als eine Umrundung
+    N_frames = 200 # Auflösung der Animation
+    time_steps = np.linspace(0, T_max, N_frames)
+    Psis = []
+    P_grids = []
+
+    coefficients_alpha = np.zeros(len(edge_indices), dtype=complex)
+    for i, alpha in enumerate(edge_indices):
+        weight = np.exp(-(eigvalues[alpha] - E0)**2 / (2 * sigma_E**2))
+        phase_k = np.exp(-1j * k_alpha * x0)
+        coefficients_alpha[i] = weight * phase_k
+
+    for tau in time_steps:
+        Psi_tau = np.zeros(200, dtype=complex)
+        for i, alpha in enumerate(edge_indices):
+            phase_time = np.exp(-1j * eigvalues[alpha] * tau / hbar)
+            Psi_tau += coefficients_alpha[i] * phase_time * eigvectors[:, alpha]
+
+
+        Psi_tau_norm = Psi_tau / np.linalg.norm(Psi_tau)
+        Psis.append(Psi_tau_norm)
+        P_grid = np.sum(np.abs(Psi_tau_norm.reshape(10, 10, 2))**2, axis=2)
+        P_grids.append(P_grid)
+
+    write_to_output(f"P_grids länge: {len(P_grids)}, \t shape: {P_grids[0].shape}")
+
+
+    ### --- Plot --- stimmt irgendwas noch nicht...
     fig = ax.figure
     fig.clear()
     ax_dummy = fig.add_subplot(projection='3d')
