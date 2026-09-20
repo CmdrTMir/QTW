@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter import font
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
@@ -19,6 +20,17 @@ from Sim1D2band import twoband_1D
 from Sim2D2band import twoband_2D
 from SimWaveInit import wave_init
 from SimWaveOmega import wave_omega
+
+# globale Konfiguration:
+plt.rcParams.update({
+    'font.size': 12,            # allgemeine Schriftgröße
+    # 'axes.titlesize': 16,       # Titel
+    # 'axes.labelsize': 14,       # Achsenbeschriftungen
+    # 'xtick.labelsize': 12,      # x-Achsenticks
+    # 'ytick.labelsize': 12,      # y-Achsenticks
+    # 'legend.fontsize': 12,      # Legende
+    # 'figure.titlesize': 18,     # Figurentitel
+})
 
 
 class TabWithMode(ttk.Frame):
@@ -150,10 +162,10 @@ class TabWithMode(ttk.Frame):
         # Buttons zum Ausführen
         button_frame = tk.Frame(self)
         button_frame.pack(pady=5)
-        self.run_button = tk.Button(button_frame, text="Run Script", font=("Arial", 11, "bold"), fg="#000080", command=self.execute_script)
+        self.run_button = tk.Button(button_frame, text="Run Script", font=("Arial", 12, "bold"), fg="#000080", command=self.execute_script)
         self.run_button.pack(side=tk.LEFT, padx=5)
         if param_list and "steady" in param_list:
-            self.steady_button = tk.Button(button_frame, text="Steady State", font=("Arial", 11, "bold"), command=self.execute_steady_state)
+            self.steady_button = tk.Button(button_frame, text="Steady State", font=("Arial", 12, "bold"), command=self.execute_steady_state)
             self.steady_button.pack(side=tk.LEFT, padx=5)
 
         if n_axes == 2:
@@ -300,6 +312,14 @@ class MainApp:
 
 if __name__ == "__main__":
     root = tk.Tk()
+
+    # ---- Tkinter globale Schriftgröße ----
+    default_font = font.nametofont("TkDefaultFont")
+    default_font.configure(size=12)
+    # Optional: Auch für Text-Widgets
+    text_font = font.nametofont("TkTextFont")
+    text_font.configure(size=12)
+
     app = MainApp(root)
     root.protocol("WM_DELETE_WINDOW", lambda: (root.quit(), root.destroy()))
     root.mainloop()
