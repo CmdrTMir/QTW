@@ -23,13 +23,13 @@ from SimWaveOmega import wave_omega
 
 # globale Konfiguration:
 plt.rcParams.update({
-    'font.size': 12,            # allgemeine Schriftgröße
-    # 'axes.titlesize': 16,       # Titel
-    # 'axes.labelsize': 14,       # Achsenbeschriftungen
-    # 'xtick.labelsize': 12,      # x-Achsenticks
-    # 'ytick.labelsize': 12,      # y-Achsenticks
-    # 'legend.fontsize': 12,      # Legende
-    # 'figure.titlesize': 18,     # Figurentitel
+    'font.size': 14,            # allgemeine Schriftgröße
+    'axes.titlesize': 14,       # Titel
+    'axes.labelsize': 14,       # Achsenbeschriftungen
+    'xtick.labelsize': 12,      # x-Achsenticks
+    'ytick.labelsize': 12,      # y-Achsenticks
+    'legend.fontsize': 12,      # Legende
+    'figure.titlesize': 16,     # Figurentitel
 })
 
 
@@ -296,7 +296,7 @@ class MainApp:
         sub_notebook4.add(tab8, text="DimReduction")
         tab9 = TabWithMode(sub_notebook4, "Chain-2D", chain_to_2D, ["N"])
         sub_notebook4.add(tab9, text="Chain-2D")
-        tab10 = TabWithMode(sub_notebook4, "2D", dimRed_2D, ["N", "t", "t_v", "tf"])
+        tab10 = TabWithMode(sub_notebook4, "2D", dimRed_2D, ["N", "t", "t_v", "gamma", "kappa", "tf"])
         sub_notebook4.add(tab10, text="2D")
         tab12 = TabWithMode(sub_notebook4, "eigenvals_2D", eigenvals_2D, ["N", "t", "t_v", "t_d"], n_axes=2) # <- 2 plots
         sub_notebook4.add(tab12, text="eigenvals_2D")

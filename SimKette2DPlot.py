@@ -7,6 +7,17 @@ import qutip as qt
 import time
 import math
 
+# globale Konfiguration:
+plt.rcParams.update({
+    'font.size': 14,            # allgemeine Schriftgröße
+    'axes.titlesize': 14,       # Titel
+    'axes.labelsize': 14,       # Achsenbeschriftungen
+    'xtick.labelsize': 12,      # x-Achsenticks
+    'ytick.labelsize': 12,      # y-Achsenticks
+    'legend.fontsize': 12,      # Legende
+    'figure.titlesize': 16,     # Figurentitel
+})
+
 # ---- Lindblad-Terme ----
 def fun_rho_dot(t, y, H, c, c_dag, kappa, gamma, N):
     rho = y.reshape(N+1, N+1)
@@ -211,7 +222,7 @@ def chain_to_2D(ax, write_to_output, params):
     # Scatter-Plot
     scatter = ax.scatter(
         x_flat, y_flat,
-        s=200,
+        s=400,
         c=densities,
         cmap='hot',
         alpha=0.8,
@@ -228,13 +239,17 @@ def chain_to_2D(ax, write_to_output, params):
             else:
                 site = r * n + (n - 1 - c) +1
             y_pos = n - 1 - r
-            ax.text(c + offset, y_pos + offset, str(site), ha='left', va='bottom', color='black', fontsize=7)
+            ax.text(c + offset, y_pos + offset, str(site), ha='left', va='bottom', color='black', fontsize=12)
 
     # Colorbar
     fig = ax.figure
-    fig.colorbar(scatter, ax=ax, label="Density (steady state)")
+    #fig.colorbar(scatter, ax=ax, label='Expectation value (density)')
+    cbar = fig.colorbar(scatter, ax=ax)
+    cbar.set_label('Expectation value (density)', fontsize=14)
+    cbar.ax.tick_params(labelsize=12)
 
-    ax.set_title('Steady-state density distribution (Chain-2D-mapping)')
+    ax.set_title('Steady state density distribution (Chain-2D-mapping)', fontsize=16)
+    ax.tick_params(axis='both', labelsize=14)
     ax.set_xticks(np.arange(n))
     ax.set_xticklabels(np.arange(0, n))
     ax.set_yticks(np.arange(n))
@@ -242,6 +257,8 @@ def chain_to_2D(ax, write_to_output, params):
     ax.grid(True, linestyle='--', alpha=0.3)
     ax.set_xlim(-0.5, n - 0.5)
     ax.set_ylim(-0.5, n - 0.5)
+
+    ax.figure.savefig("plotSnake.png", dpi=400, bbox_inches="tight")
 
 
 

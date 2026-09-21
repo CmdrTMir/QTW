@@ -7,6 +7,17 @@ import qutip as qt
 import time
 import math
 
+# globale Konfiguration:
+plt.rcParams.update({
+    'font.size': 14,            # allgemeine Schriftgröße
+    'axes.titlesize': 14,       # Titel
+    'axes.labelsize': 14,       # Achsenbeschriftungen
+    'xtick.labelsize': 12,      # x-Achsenticks
+    'ytick.labelsize': 12,      # y-Achsenticks
+    'legend.fontsize': 12,      # Legende
+    'figure.titlesize': 16,     # Figurentitel
+})
+
 
 # ---- Lindblad-Terme ----
 def fun_rho_dot(t, y, H, c, c_dag, kappa, gamma, N):
@@ -23,9 +34,8 @@ def dimRed_2D(ax, write_to_output, params):
     N = params.get("N", 9)
     t_h = params.get("t", 0.1)
     t_v = params.get("t_v", 0.1)
-    gamma = 0.1 #params.get("gamma", 1.0)
-    kappa = 0.001 #params.get("kappa", 4.0)
-    #mode = params.get("mode", "time")
+    gamma = params.get("gamma", 0.1)
+    kappa = params.get("kappa", 0.005)
     tf = params.get("tf", 100)
 
     # New calculation for H and c's
@@ -103,7 +113,7 @@ def dimRed_2D(ax, write_to_output, params):
 #     ss_reached = False
     ss_delta = False
 
-    eps_delta = 1e-9
+    eps_delta = 1e-3
     eps_diff = 1e-4
     dt = 0.5
     t0 = 0
@@ -214,7 +224,7 @@ def dimRed_2D(ax, write_to_output, params):
     # Scatter-Plot
     scatter = ax.scatter(
         x_flat, y_flat,
-        s=200,
+        s=400,
         c=densities,
         cmap='hot',
         alpha=0.8,
@@ -228,13 +238,20 @@ def dimRed_2D(ax, write_to_output, params):
         for c in range(n):
             site = r * n + c + 1
             y_pos = n - 1 - r
-            ax.text(c + offset, y_pos + offset, str(site), ha='left', va='bottom', color='black', fontsize=7)
+            ax.text(c + offset, y_pos + offset, str(site), ha='left', va='bottom', color='black', fontsize=12)
 
     # Colorbar
     fig = ax.figure
-    fig.colorbar(scatter, ax=ax, label='Expectation Value Density')
+    #fig.colorbar(scatter, ax=ax, label='Expectation value (density)')
+    cbar = fig.colorbar(scatter, ax=ax)
+    cbar.set_label('Expectation value (density)', fontsize=14)
+    cbar.ax.tick_params(labelsize=12)
 
-    ax.set_title('Steady-state density distribution')
+    print("C) font.size =", plt.rcParams['font.size'])
+    print("C) axes.labelsize =", plt.rcParams['axes.labelsize'])
+
+    ax.set_title('Steady state density distribution', fontsize=18)
+    ax.tick_params(axis='both', labelsize=14)
     ax.set_xticks(np.arange(n))
     ax.set_xticklabels(np.arange(0, n))
     ax.set_yticks(np.arange(n))
@@ -242,6 +259,8 @@ def dimRed_2D(ax, write_to_output, params):
     ax.grid(True, linestyle='--', alpha=0.3)
     ax.set_xlim(-0.5, n - 0.5)
     ax.set_ylim(-0.5, n - 0.5)
+
+    ax.figure.savefig("plot2D.png", dpi=400, bbox_inches="tight")
 
 
 
