@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.widgets import Slider
 from scipy import constants
 from scipy.linalg import eigh
 import scipy.integrate as si
@@ -18,6 +19,120 @@ plt.rcParams.update({
     'figure.titlesize': 16,     # Figurentitel
 })
 
+def plot_time_evolution_with_slider(write_to_output, ax, ew_listen, t_all, n, N):
+    write_to_output(f"Offene Figuren vor dem Plot: {plt.get_fignums()}", "#fbcf2b")
+    for fig_num in plt.get_fignums():
+        fig = plt.figure(fig_num)
+        if fig is not ax.figure:  # GUI-Figure nicht schließen
+            plt.close(fig)
+
+    num_frames = min(700, max(400, len(t_all) // 4))
+    step = max(1, len(t_all) // num_frames)
+    indices = list(range(0, len(t_all), step))
+    if indices[-1] != len(t_all) - 1:
+        indices.append(len(t_all) - 1)
+    t_selected = [t_all[i] for i in indices]
+    ew_selected = []
+    for site in range(1, N+1):
+        ew_site_selected = [ew_listen[site][i] for i in indices]
+        ew_selected.append(ew_site_selected)
+
+    write_to_output(f"Time evolution: {len(t_all)} frames -> {len(indices)} frames (subsampled)")
+    # vmin/vmax über alle Frames
+    all_densities = []
+    for site_data in ew_selected:
+        all_densities.extend(site_data)
+    vmin = min(all_densities)
+    vmax = max(all_densities)
+
+    # Container
+    class PlotContainer:
+        pass
+    container = PlotContainer()
+    container.t_selected = t_selected
+    container.ew_selected = ew_selected
+    container.n = n
+    container.N = N
+    container.ax = ax
+    container.current_idx = len(indices) - 1
+    container.vmin = vmin
+    container.vmax = vmax
+
+    # --- INITIAL PLOT erstellen (NICHT in einer Funktion!) ---
+    frame_idx = container.current_idx
+    steady_state = [ew_selected[site][frame_idx] for site in range(N)]
+    grid = np.zeros((n, n))
+    for site in range(N):
+        r = site // n
+        c = site % n
+        grid[r, c] = steady_state[site]
+    x = np.arange(n)
+    y = np.arange(n)
+    X, Y = np.meshgrid(x, y)
+    x_flat = X.flatten()
+    y_flat = Y.flatten()
+    densities = grid.flatten()
+    # Scatter erstellen und speichern
+    container.scatter = ax.scatter(
+        x_flat, y_flat,
+        s=400,
+        c=densities,
+        cmap='hot',
+        alpha=0.8,
+        edgecolors='black',
+        linewidth=0.5,
+        vmin=vmin,
+        vmax=vmax
+    )
+    # Site-Nummern (bleiben gleich)
+    offset = 0.15
+    for r in range(n):
+        for c in range(n):
+            site = r * n + c + 1
+            y_pos = n - 1 - r
+            ax.text(c + offset, y_pos + offset, str(site),
+                   ha='left', va='bottom', color='black', fontsize=12)
+    fig = ax.figure
+    container.cbar = fig.colorbar(container.scatter, ax=ax)
+    container.cbar.set_label('Expectation value (density)', fontsize=14)
+    container.cbar.ax.tick_params(labelsize=12)
+
+    container.title = ax.set_title(f'Time evolution (t = {t_selected[frame_idx]:.2f})', fontsize=18)
+    ax.tick_params(axis='both', labelsize=14)
+    ax.set_xticks(np.arange(n))
+    ax.set_xticklabels(np.arange(0, n))
+    ax.set_yticks(np.arange(n))
+    ax.set_yticklabels(np.arange(n-1, -1, -1))
+    ax.grid(True, linestyle='--', alpha=0.3)
+    ax.set_xlim(-0.5, n - 0.5)
+    ax.set_ylim(-0.5, n - 0.5)
+
+    plt.subplots_adjust(bottom=0.15)
+    ax_slider = plt.axes([0.15, 0.05, 0.7, 0.03])
+    container.slider = Slider(
+        ax=ax_slider,
+        label='Time Step',
+        valmin=0,
+        valmax=len(indices) - 1,
+        valinit=container.current_idx,
+        valstep=1
+    )
+    def update(val):
+        frame_idx = int(val)
+        steady_state = [ew_selected[site][frame_idx] for site in range(N)]
+        grid = np.zeros((n, n))
+        for site in range(N):
+            r = site // n
+            c = site % n
+            grid[r, c] = steady_state[site]
+        densities = grid.flatten()
+        container.scatter.set_array(densities)
+        container.title.set_text(f'Time evolution (t = {t_selected[frame_idx]:.2f})')
+        fig.canvas.draw_idle()
+
+    container.slider.on_changed(update)
+    container.slider.set_val(0)
+    return container
 
 # ---- Lindblad-Terme ----
 def fun_rho_dot(t, y, H, c, c_dag, kappa, gamma, N):
@@ -247,9 +362,6 @@ def dimRed_2D(ax, write_to_output, params):
     cbar.set_label('Expectation value (density)', fontsize=14)
     cbar.ax.tick_params(labelsize=12)
 
-    print("C) font.size =", plt.rcParams['font.size'])
-    print("C) axes.labelsize =", plt.rcParams['axes.labelsize'])
-
     ax.set_title('Steady state density distribution', fontsize=18)
     ax.tick_params(axis='both', labelsize=14)
     ax.set_xticks(np.arange(n))
@@ -261,6 +373,11 @@ def dimRed_2D(ax, write_to_output, params):
     ax.set_ylim(-0.5, n - 0.5)
 
     ax.figure.savefig("plot2D.png", dpi=400, bbox_inches="tight")
+
+    # 2. Zeitentwicklung mit Slider (NEU)
+    fig2, ax2 = plt.subplots()
+    container = plot_time_evolution_with_slider(write_to_output, ax2, ew_listen, t_all, n, N)
+    plt.show()
 
 
 
