@@ -149,13 +149,17 @@ def wave_init(ax, write_to_output, params):
 
     write_to_output(f'Time steps in t_all: {len(t_all)}')
     num_frames = min(700, max(400, len(t_all) // 4))
-    t_min = t_all[0]
-    t_max = t_all[-1]
-    if t_min == 0:
-        t_min = 1e-6
-    log_times = np.logspace(np.log10(t_min), np.log10(t_max), num_frames)
-    indices = [0] + [np.argmin(np.abs(np.array(t_all) - t)) for t in log_times] + [len(t_all) - 1]
-    indices = np.unique(indices)
+    step = max(1, len(t_all) // num_frames)
+    indices = list(range(0, len(t_all), step))
+    if indices[-1] != len(t_all) - 1:
+        indices.append(len(t_all) - 1)
+    # t_min = t_all[0]
+    # t_max = t_all[-1]
+    # if t_min == 0:
+    #     t_min = 1e-6
+    # log_times = np.logspace(np.log10(t_min), np.log10(t_max), num_frames)
+    # indices = [0] + [np.argmin(np.abs(np.array(t_all) - t)) for t in log_times] + [len(t_all) - 1]
+    # indices = np.unique(indices)
     #indices = range(0, len(t_all), step)
     t_selected = [t_all[i] for i in indices]
 
@@ -208,6 +212,42 @@ def wave_init(ax, write_to_output, params):
     slider.on_changed(update)
     fig.canvas.draw()
     fig.canvas.flush_events()
+
+    # ---------------------------------------------------------
+    # Zusätzlicher Plot: Zeitcollage mit ausgewählten Zeitpunkten
+    # ---------------------------------------------------------
+    desired_times = [0.0, 2.5, 5.5, 9.4, 12.6, 14.6, 23.4, 28.8]
+    selected_indices = [np.argmin(np.abs(np.asarray(t_all) - t)) for t in desired_times]
+    fig_collage, axes = plt.subplots(
+        2, 4,
+        figsize=(12, 6),
+        sharex=True,
+        sharey=True
+    )
+    axes = axes.flatten()
+    for ax_c, idx in zip(axes, selected_indices):
+        occupations = [ew_listen[site][idx] for site in range(1, N + 1)]
+        ax_c.bar(
+            range(1, N + 1),
+            occupations,
+            color='#fbb32b'
+        )
+        ax_c.set_title(f'time = {t_all[idx]:.3f}')
+        ax_c.set_ylim(0, y_max)
+        tick_step = 2
+        ticks = list(range(1, N + 1, tick_step))
+        if ticks[-1] != N:
+            ticks.append(N)
+        ax_c.set_xticks(ticks)
+    # Gemeinsame Achsenbeschriftungen
+    fig_collage.supxlabel('Site')
+    fig_collage.supylabel('expectation value')
+    fig_collage.tight_layout()
+    fig_collage.savefig(
+        'wave_init_collage.pdf',
+        bbox_inches='tight'
+    )
+    plt.close(fig_collage)
 
 
 
