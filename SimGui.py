@@ -8,7 +8,7 @@ import numpy as np
 #from SimNatrium import Natrium
 from SimLindblad import lindblad
 from SimLindbladT import T_lindblad
-from SimQutipLMEq import qutip_lindblad
+#from SimQutipLMEq import qutip_lindblad
 #from SimAnalytical import analytical
 from SimSingleExcitation import single_excitation
 from SimDimReduction import dim_reduction
@@ -255,8 +255,8 @@ class MainApp:
         sub_notebook1.add(tab1, text="Lindblad")
         tab2 = TabWithMode(sub_notebook1, "variable T", T_lindblad, ["N", "t", "gamma", "d", "steady"])
         sub_notebook1.add(tab2, text="variable T")
-        tab6 = TabWithMode(sub_notebook1, "Qutip LMEq", qutip_lindblad, ["N", "t", "gamma", "steady"])
-        sub_notebook1.add(tab6, text="Qutip LMEq")
+        #tab6 = TabWithMode(sub_notebook1, "Qutip LMEq", qutip_lindblad, ["N", "t", "gamma", "steady"])
+        #sub_notebook1.add(tab6, text="Qutip LMEq")
         tab7 = TabWithMode(sub_notebook1, "SingleExcitation", single_excitation, ["N", "t", "gamma", "kappa", "tf", "steady"])
         sub_notebook1.add(tab7, text="SingleExcitation")
 

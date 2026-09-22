@@ -10,10 +10,10 @@ import time
 import math
 
 # ---- H-Laser ----
-def H_z(H_tb, z, sigma_z, k0, a):
-    z0 = 3 * sigma_z
-    O0 = 0.2 * 0.5 # t = 0.5                        # O0 - Kopplungsstärke
-    omega_0 = -2 * 0.5 * math.cos(k0 * a)           # Trägerfrequenz des Lasers?
+def H_z(H_tb, z, sigma_z, k0, a, J):
+    z0 = 2 * sigma_z
+    O0 = 0.2 * J                                    # O0 - Kopplungsstärke
+    omega_0 = -2 * J * math.cos(k0 * a)             # Trägerfrequenz des Lasers?
 
     f_z = np.exp(-(z - z0)**2 / (2 * sigma_z**2))   # Gauß-Teil
     Omega = O0 * f_z * np.exp(-1j * omega_0 * z)    # Zusammensetzen (abhängig von Zeit z)
@@ -25,36 +25,36 @@ def H_z(H_tb, z, sigma_z, k0, a):
     return H_tb + H_laser
 
 # ---- solver-Funktion ----
-def schrödinger(t, y, H_tb, hbar, sigma_z, k0, a):
+def schrödinger(t, y, H_tb, hbar, sigma_z, k0, a, J):
     psi = y
-    H = H_z(H_tb, t, sigma_z, k0, a)
+    H = H_z(H_tb, t, sigma_z, k0, a, J)
     psi_dot = -1j / hbar * (H @ psi)
     return psi_dot
 
 def wave_omega(ax, write_to_output, params):
     # ---- Variablen ----
     N = params.get("N", 2)
-    t = 0.5 #params.get("t", 1.0)
+    J = 0.5 #params.get("t", 1.0)
     a = 1   # damit ist die Brillouin-Zone -pi < k0 < pi
     k0 = params.get("k0", 1.5708) # np.pi / 2
     hbar = 1
 
-    write_to_output(f'The parameters are set to:    t: {t:.2f}')
+    write_to_output(f'The parameters are set to:    t: {J:.2f}')
 
     # definition of laser with omega
     # z = Zeit!
     M = 5                                                   # Anzahl der Sites, die das Paket überdeckt
     sigma_x = (M * a) / 2.0                                 # örtliche Breite des Pulses
-    v_g = ((2 * t * a) / hbar) * math.sin(k0 * a)
+    v_g = ((2 * J * a) / hbar) * math.sin(k0 * a)
     if v_g == 0:
-        tau = ((2 * t * a**2) / hbar) * math.cos(k0 * a)    # Dissipation (2. Derivation)
-        sigma_z = 2.5 / t                                   # zeitliche Breite des Pulses
+        tau = ((2 * J * a**2) / hbar) * math.cos(k0 * a)    # Dissipation (2. Derivation)
+        sigma_z = 2.5 / J                                   # zeitliche Breite des Pulses
     else:
         tau = (((N+1) * a) / v_g)
         sigma_z = (2 * sigma_x) / v_g
 
-    z_puls_on = 3 * sigma_z
-    z_puls_off = 3 * sigma_z * 2 # definitiv aus
+    z_puls_on = 2 * sigma_z
+    z_puls_off = 2 * sigma_z * 2 # definitiv aus
     # tau = wandert durchs Gitter (oder bei v_g=0 Dissipation)
     zf = z_puls_on + z_puls_off * sigma_z + tau
 
@@ -73,9 +73,9 @@ def wave_omega(ax, write_to_output, params):
             pass
         else:
             if j-1 >= 1:
-                col += -t * vecs[j-1]
+                col += -J * vecs[j-1]
             if j+1 <= N:
-                col += -t * vecs[j+1]
+                col += -J * vecs[j+1]
         H_tb.append(col)
 
     H_tb = np.array(H_tb)
@@ -104,7 +104,7 @@ def wave_omega(ax, write_to_output, params):
             y0=y,
             method='DOP853',
             t_eval=np.linspace(t0, t0+dt, 10),
-            args=(H_tb, hbar, sigma_z, k0, a),
+            args=(H_tb, hbar, sigma_z, k0, a, J),
             rtol=1e-5,
             atol=1e-8
         )
@@ -124,6 +124,11 @@ def wave_omega(ax, write_to_output, params):
 
     end_solve = time.perf_counter()
     write_to_output(f'Computing took {(end_solve - start_solve):.4f} s', "#228B22")
+                    # z0
+    t_reflection = 2 * sigma_z + tau
+    write_to_output(f'First reflection at site N occurs at t = {t_reflection:.3f}')
+    t_first_interference = 2 * sigma_z + tau - (2 * sigma_x) / v_g
+    write_to_output(f'After {t_first_interference:.3f}, interference patterns start to form.')
 
     # Plot:
     max_val = max(max(ew_listen[1]), max(ew_listen[-1]))
@@ -134,16 +139,19 @@ def wave_omega(ax, write_to_output, params):
 
     write_to_output(f'Time steps in t_all: {len(t_all)}')
     num_frames = min(700, max(400, len(t_all) // 4))
-    t_min = t_all[0]
-    t_max = t_all[-1]
-    if t_min == 0:
-        t_min = 1e-6
-    log_times = np.logspace(np.log10(t_min), np.log10(t_max), num_frames)
-    indices = [0] + [np.argmin(np.abs(np.array(t_all) - t)) for t in log_times] + [len(t_all) - 1]
-    indices = np.unique(indices)
+    step = max(1, len(t_all) // num_frames)
+    indices = list(range(0, len(t_all), step))
+    if indices[-1] != len(t_all) - 1:
+        indices.append(len(t_all) - 1)
+    # t_min = t_all[0]
+    # t_max = t_all[-1]
+    # if t_min == 0:
+    #     t_min = 1e-6
+    # log_times = np.logspace(np.log10(t_min), np.log10(t_max), num_frames)
+    # indices = [0] + [np.argmin(np.abs(np.array(t_all) - t)) for t in log_times] + [len(t_all) - 1]
+    # indices = np.unique(indices)
     #indices = range(0, len(t_all), step)
     t_selected = [t_all[i] for i in indices]
-
     write_to_output(f'Time steps selected: {len(t_selected)}')
     ew_selected = [] # ohne Vakuum! 0=>1
     for site in range(1, N+1):
@@ -193,10 +201,6 @@ def wave_omega(ax, write_to_output, params):
     slider.on_changed(update)
     fig.canvas.draw()
     fig.canvas.flush_events()
-
-
-# TODO: check if and why the expectation values are so small and for a long time at 0.
-
 
 
     #Alter Plot:
