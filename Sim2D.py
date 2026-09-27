@@ -296,7 +296,7 @@ def dimRed_2D(ax, write_to_output, params):
          #diff_N = abs(current_n_N - n_N_theo)
 
         if count == 5:
-            write_to_output(f"Steady State reached as delta at t={t0:.2f}")
+            write_to_output(f"Steady State reached as delta at time={t0:.2f}")
             write_to_output(f"deltas remaining: eps={eps_delta}" + "\n"
                         + f"delta_1: {delta_1:.10f}" + "\n"
                         + f"delta_j: {delta_j:.10f}" + "\n"
@@ -335,13 +335,16 @@ def dimRed_2D(ax, write_to_output, params):
     x_flat = X.flatten()
     y_flat = Y.flatten()
     densities = grid.flatten()
+    d_min, d_max = np.min(densities), np.max(densities)
+    densities_norm = (densities - d_min) / (d_max - d_min)
 
     # Scatter-Plot
     scatter = ax.scatter(
         x_flat, y_flat,
         s=400,
-        c=densities,
-        cmap='hot',
+        c=densities_norm,
+        cmap='Greens',
+        vmin=0, vmax=1,
         alpha=0.8,
         edgecolors='black',
         linewidth=0.5
@@ -359,7 +362,7 @@ def dimRed_2D(ax, write_to_output, params):
     fig = ax.figure
     #fig.colorbar(scatter, ax=ax, label='Expectation value (density)')
     cbar = fig.colorbar(scatter, ax=ax)
-    cbar.set_label('Expectation value (density)', fontsize=14)
+    cbar.set_label('Relative steady state density', fontsize=14)
     cbar.ax.tick_params(labelsize=12)
 
     ax.set_title('Steady state density distribution', fontsize=18)
@@ -372,12 +375,12 @@ def dimRed_2D(ax, write_to_output, params):
     ax.set_xlim(-0.5, n - 0.5)
     ax.set_ylim(-0.5, n - 0.5)
 
-    ax.figure.savefig("plot2D.png", dpi=400, bbox_inches="tight")
+    #ax.figure.savefig("plot2D.png", dpi=400, bbox_inches="tight")
 
     # 2. Zeitentwicklung mit Slider (NEU)
-    fig2, ax2 = plt.subplots()
-    container = plot_time_evolution_with_slider(write_to_output, ax2, ew_listen, t_all, n, N)
-    plt.show()
+    #fig2, ax2 = plt.subplots()
+    #container = plot_time_evolution_with_slider(write_to_output, ax2, ew_listen, t_all, n, N)
+    #plt.show()
 
 
 
