@@ -20,6 +20,7 @@ from Sim1D2band import twoband_1D
 from Sim2D2band import twoband_2D
 from SimWaveInit import wave_init
 from SimWaveOmega import wave_omega
+from SimNanoribbon import Nanoribbon
 
 # globale Konfiguration:
 plt.rcParams.update({
@@ -140,6 +141,12 @@ class TabWithMode(ttk.Frame):
                 self.ep_var = tk.DoubleVar(value=2.0)
                 self.ep_spin = tk.Spinbox(row1, from_=0.0, to=50.0, increment=0.1, textvariable=self.ep_var, font=("Arial", 12), width=8)
                 self.ep_spin.pack(side=tk.LEFT, padx=5)
+            if "m" in param_list:
+                tk.Label(row1, text="m: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
+                self.m_var = tk.StringVar(value=0)
+                m_values = list(range(-3, 4))
+                self.m_combo = ttk.Combobox(row1, textvariable=self.m_var, values=m_values, font=("Arial", 12), width=6, state="readonly")
+                self.m_combo.pack(side=tk.LEFT, padx=5)
             self.param_vars = {}
             if hasattr(self, 'N_var'): self.param_vars['N'] = self.N_var
             if hasattr(self, 't_var'): self.param_vars['t'] = self.t_var
@@ -158,6 +165,7 @@ class TabWithMode(ttk.Frame):
             if hasattr(self, 't_tps_var'): self.param_vars['t_tps'] = self.t_tps_var
             if hasattr(self, 'es_var'): self.param_vars['e_s'] = self.es_var
             if hasattr(self, 'ep_var'): self.param_vars['e_p'] = self.ep_var
+            if hasattr(self, 'm_var'): self.param_vars['m'] = self.m_var
 
         # Buttons zum Ausführen
         button_frame = tk.Frame(self)
@@ -273,6 +281,8 @@ class MainApp:
         sub_notebook2.add(tab3a, text="1D2band")
         tab3b = TabWithMode(sub_notebook2, "2D2band", twoband_2D, ["N", "t"])
         sub_notebook2.add(tab3b, text="2D2band")
+        tab3c = TabWithMode(sub_notebook2, "Nanoribbon", Nanoribbon, ["m"])
+        sub_notebook2.add(tab3c, text="Nanoribbon")
 
         # === Gruppe 3: Tests ===
         group3_frame = ttk.Frame(self.notebook)
