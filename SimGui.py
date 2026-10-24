@@ -4,12 +4,13 @@ from tkinter import font
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
+import vlc
+import sys
+import os
 
-#from SimNatrium import Natrium
+from videoplayer import VideoPlayer, create_video_controls
 from SimLindblad import lindblad
 from SimLindbladT import T_lindblad
-#from SimQutipLMEq import qutip_lindblad
-#from SimAnalytical import analytical
 from SimSingleExcitation import single_excitation
 from SimDimReduction import dim_reduction
 from SimKette2DPlot import chain_to_2D
@@ -143,10 +144,18 @@ class TabWithMode(ttk.Frame):
                 self.ep_spin.pack(side=tk.LEFT, padx=5)
             if "m" in param_list:
                 tk.Label(row1, text="m: ", font=("Arial", 12)).pack(side=tk.LEFT, padx=2)
-                self.m_var = tk.StringVar(value=0)
-                m_values = list(range(-3, 4))
-                self.m_combo = ttk.Combobox(row1, textvariable=self.m_var, values=m_values, font=("Arial", 12), width=6, state="readonly")
-                self.m_combo.pack(side=tk.LEFT, padx=5)
+                self.m_var = tk.DoubleVar(value=1.0)
+                self.m_scale = tk.Scale(
+                    row1,
+                    from_=-3.0,
+                    to=3.0,
+                    resolution=0.1,
+                    orient=tk.HORIZONTAL,
+                    variable=self.m_var,
+                    length=200,
+                    font=("Arial", 10)
+                )
+                self.m_scale.pack(side=tk.LEFT, padx=5)
             self.param_vars = {}
             if hasattr(self, 'N_var'): self.param_vars['N'] = self.N_var
             if hasattr(self, 't_var'): self.param_vars['t'] = self.t_var
@@ -241,9 +250,17 @@ def script1(ax):
     x = np.linspace(0, 10, 100)
     ax.plot(x, np.sin(x), label="Skript 1: Sinus")
     ax.legend()
-
 # ------------------------------------------------------------
 class MainApp:
+    # def play_video(self):
+    #     if hasattr(self, 'player') and self.player is not None:
+    #         self.player.play()
+    # def stop_video(self):
+    #     if hasattr(self, 'player') and self.player is not None:
+    #         self.player.stop()
+    # def pause_video(self):
+    #     if hasattr(self, 'player') and self.player is not None:
+    #         self.player.pause()
     def __init__(self, root):
         self.root = root
         self.root.title("GUI for multiple tasks")
@@ -251,6 +268,53 @@ class MainApp:
 
         self.notebook = ttk.Notebook(root)
         self.notebook.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+        # === Gruppe 0: Welcome / Video ===
+        self.video_players = []
+        welcome_frame = ttk.Frame(self.notebook)
+        self.notebook.add(welcome_frame, text="Welcome")
+        #self.video_container = tk.Frame(welcome_frame, bg="black", width=640, height=360)
+        #self.video_container.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
+        #self.video_status_label = tk.Label(welcome_frame, text="Video Player Ready", font=("Arial", 10))
+        #self.video_status_label.pack(side=tk.BOTTOM, pady=5)
+
+        # Video-Container erstellen
+        self.video_container = tk.Frame(welcome_frame, bg="black", width=640, height=360)
+        self.video_container.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
+        # Player und Buttons in einem Rutsch
+        self.welcome_player = VideoPlayer(self.video_container, "videos/welcome.mp4")
+        self.video_players.append(self.welcome_player)
+        create_video_controls(welcome_frame, self.welcome_player)
+        #self.welcome_player.play()
+
+        # try:
+        #     self.vlc_instance = vlc.Instance("--no-xlib", "--vout=direct3d9") # --no-xlib verhindert Konflikte bei Linux/macOS
+        #     self.player = self.vlc_instance.media_player_new()
+        # except Exception as e:
+        #     print(f"Fehler beim Starten von VLC: {e}")
+        #     self.player = None
+        # if sys.platform == "win32":
+        #     self.player.set_hwnd(self.video_container.winfo_id())
+        # elif sys.platform.startswith("linux"):
+        #     self.player.set_xwindow(self.video_container.winfo_id())
+        # elif sys.platform == "darwin":
+        #     self.player.set_nsobject(self.video_container.winfo_id())
+        # script_dir = os.path.dirname(os.path.abspath(__file__))
+        # video_rel_path = os.path.join("videos", "Explain.mp4")
+        # video_abs_path = os.path.join(script_dir, video_rel_path)
+        # media = self.vlc_instance.media_new(video_abs_path)
+        # self.player.set_media(media)
+        # self.player.play()
+        #
+        # # Ein Frame für die Steuerungs-Buttons
+        # control_frame = tk.Frame(welcome_frame)
+        # control_frame.pack(pady=5)
+        # self.play_btn = tk.Button(control_frame, text="Play", command=self.play_video, width=10, font=("Arial", 12, "bold"))
+        # self.play_btn.pack(side=tk.LEFT, padx=5)
+        # self.stop_btn = tk.Button(control_frame, text="Stop", command=self.stop_video, width=10, font=("Arial", 12, "bold"))
+        # self.stop_btn.pack(side=tk.LEFT, padx=5)
+        # self.pause_btn = tk.Button(control_frame, text="Pause", command=self.pause_video, width=10, font=("Arial", 12, "bold"))
+        # self.pause_btn.pack(side=tk.LEFT, padx=5)
 
         # === Gruppe 1: Full Dims ===
         group1_frame = ttk.Frame(self.notebook)
@@ -263,8 +327,6 @@ class MainApp:
         sub_notebook1.add(tab1, text="Lindblad")
         tab2 = TabWithMode(sub_notebook1, "variable T", T_lindblad, ["N", "t", "gamma", "d", "steady"])
         sub_notebook1.add(tab2, text="variable T")
-        #tab6 = TabWithMode(sub_notebook1, "Qutip LMEq", qutip_lindblad, ["N", "t", "gamma", "steady"])
-        #sub_notebook1.add(tab6, text="Qutip LMEq")
         tab7 = TabWithMode(sub_notebook1, "SingleExcitation", single_excitation, ["N", "t", "gamma", "kappa", "tf", "steady"])
         sub_notebook1.add(tab7, text="SingleExcitation")
 
@@ -275,25 +337,22 @@ class MainApp:
         sub_notebook2.pack(fill=tk.BOTH, expand=True)
 
         # Tabs in Gruppe 2
-        #tab3 = TabWithMode(sub_notebook2, "Natrium", Natrium, None)
-        #sub_notebook2.add(tab3, text="Natrium")
         tab3a = TabWithMode(sub_notebook2, "1D2band", twoband_1D, ["t_ss", "t_pp", "r_tsp", "t_tsp", "r_tps", "t_tps", "e_s", "e_p"])
         sub_notebook2.add(tab3a, text="1D2band")
-        tab3b = TabWithMode(sub_notebook2, "2D2band", twoband_2D, ["N", "t"])
+        tab3b = TabWithMode(sub_notebook2, "2D2band", twoband_2D, ["t", "m"])
         sub_notebook2.add(tab3b, text="2D2band")
         tab3c = TabWithMode(sub_notebook2, "Nanoribbon", Nanoribbon, ["m"])
         sub_notebook2.add(tab3c, text="Nanoribbon")
 
         # === Gruppe 3: Tests ===
-        group3_frame = ttk.Frame(self.notebook)
-        self.notebook.add(group3_frame, text="Tests")
-        sub_notebook3 = ttk.Notebook(group3_frame)
-        sub_notebook3.pack(fill=tk.BOTH, expand=True)
-
-        # Tabs in Gruppe 3
-        tab5 = TabWithMode(sub_notebook3, "Sinus", script1, None)
-        sub_notebook3.add(tab5, text="Sinus")
-
+        # group3_frame = ttk.Frame(self.notebook)
+        # self.notebook.add(group3_frame, text="Tests")
+        # sub_notebook3 = ttk.Notebook(group3_frame)
+        # sub_notebook3.pack(fill=tk.BOTH, expand=True)
+        #
+        # # Tabs in Gruppe 3
+        # tab5 = TabWithMode(sub_notebook3, "Sinus", script1, None)
+        # sub_notebook3.add(tab5, text="Sinus")
 
         # === Gruppe 4: (N+1)x(N+1) ===
         group4_frame = ttk.Frame(self.notebook)
@@ -314,9 +373,12 @@ class MainApp:
         sub_notebook4.add(tab13, text="wave_init")
         tab14 = TabWithMode(sub_notebook4, "wave_omega", wave_omega, ["N", "k0"], drawing=False)
         sub_notebook4.add(tab14, text="wave_omega")
-        #tab11 = TabWithMode(sub_notebook4, "2D Animation", ani_2D, ["N", "t", "gamma", "kappa", "tf"])
-        #sub_notebook4.add(tab11, text="2D Animation")
 
+    def on_closing(self):
+        for player in self.video_players:
+            player.cleanup()
+        self.root.quit()
+        self.root.destroy()
 
 
 
@@ -331,5 +393,5 @@ if __name__ == "__main__":
     text_font.configure(size=12)
 
     app = MainApp(root)
-    root.protocol("WM_DELETE_WINDOW", lambda: (root.quit(), root.destroy()))
+    root.protocol("WM_DELETE_WINDOW", app.on_closing)
     root.mainloop()
