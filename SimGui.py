@@ -269,56 +269,23 @@ class MainApp:
         self.notebook = ttk.Notebook(root)
         self.notebook.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
-        # === Gruppe 0: Welcome / Video ===
         self.video_players = []
+
+        # === Gruppe 0: Welcome / Video ===
         welcome_frame = ttk.Frame(self.notebook)
-        self.notebook.add(welcome_frame, text="Welcome")
-        #self.video_container = tk.Frame(welcome_frame, bg="black", width=640, height=360)
-        #self.video_container.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
-        #self.video_status_label = tk.Label(welcome_frame, text="Video Player Ready", font=("Arial", 10))
-        #self.video_status_label.pack(side=tk.BOTTOM, pady=5)
 
         # Video-Container erstellen
         self.video_container = tk.Frame(welcome_frame, bg="black", width=640, height=360)
         self.video_container.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
         # Player und Buttons in einem Rutsch
-        self.welcome_player = VideoPlayer(self.video_container, "videos/welcome.mp4")
+        self.welcome_player = VideoPlayer(self.video_container, "Explain.mp4")
         self.video_players.append(self.welcome_player)
         create_video_controls(welcome_frame, self.welcome_player)
-        #self.welcome_player.play()
-
-        # try:
-        #     self.vlc_instance = vlc.Instance("--no-xlib", "--vout=direct3d9") # --no-xlib verhindert Konflikte bei Linux/macOS
-        #     self.player = self.vlc_instance.media_player_new()
-        # except Exception as e:
-        #     print(f"Fehler beim Starten von VLC: {e}")
-        #     self.player = None
-        # if sys.platform == "win32":
-        #     self.player.set_hwnd(self.video_container.winfo_id())
-        # elif sys.platform.startswith("linux"):
-        #     self.player.set_xwindow(self.video_container.winfo_id())
-        # elif sys.platform == "darwin":
-        #     self.player.set_nsobject(self.video_container.winfo_id())
-        # script_dir = os.path.dirname(os.path.abspath(__file__))
-        # video_rel_path = os.path.join("videos", "Explain.mp4")
-        # video_abs_path = os.path.join(script_dir, video_rel_path)
-        # media = self.vlc_instance.media_new(video_abs_path)
-        # self.player.set_media(media)
-        # self.player.play()
-        #
-        # # Ein Frame für die Steuerungs-Buttons
-        # control_frame = tk.Frame(welcome_frame)
-        # control_frame.pack(pady=5)
-        # self.play_btn = tk.Button(control_frame, text="Play", command=self.play_video, width=10, font=("Arial", 12, "bold"))
-        # self.play_btn.pack(side=tk.LEFT, padx=5)
-        # self.stop_btn = tk.Button(control_frame, text="Stop", command=self.stop_video, width=10, font=("Arial", 12, "bold"))
-        # self.stop_btn.pack(side=tk.LEFT, padx=5)
-        # self.pause_btn = tk.Button(control_frame, text="Pause", command=self.pause_video, width=10, font=("Arial", 12, "bold"))
-        # self.pause_btn.pack(side=tk.LEFT, padx=5)
+        self.welcome_player.play()
 
         # === Gruppe 1: Full Dims ===
         group1_frame = ttk.Frame(self.notebook)
-        self.notebook.add(group1_frame, text="Full Dims")
+
         sub_notebook1 = ttk.Notebook(group1_frame)
         sub_notebook1.pack(fill=tk.BOTH, expand=True)
 
@@ -332,17 +299,38 @@ class MainApp:
 
         # === Gruppe 2: 2-BandModels ===
         group2_frame = ttk.Frame(self.notebook)
-        self.notebook.add(group2_frame, text="2-BandModels")
+
         sub_notebook2 = ttk.Notebook(group2_frame)
         sub_notebook2.pack(fill=tk.BOTH, expand=True)
 
         # Tabs in Gruppe 2
         tab3a = TabWithMode(sub_notebook2, "1D2band", twoband_1D, ["t_ss", "t_pp", "r_tsp", "t_tsp", "r_tps", "t_tps", "e_s", "e_p"])
         sub_notebook2.add(tab3a, text="1D2band")
+        videotab3A = ttk.Frame(sub_notebook2)
+        sub_notebook2.add(videotab3A, text="1D Band Hybridisation")
+        video_container_3A = tk.Frame(videotab3A, bg="black", width=640, height=360)
+        video_container_3A.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
+        video_player_3A = VideoPlayer(video_container_3A, "BandHybridization.mp4")
+        self.video_players.append(video_player_3A)
+        create_video_controls(videotab3A, video_player_3A)
         tab3b = TabWithMode(sub_notebook2, "2D2band", twoband_2D, ["t", "m"])
         sub_notebook2.add(tab3b, text="2D2band")
+        videotab3B = ttk.Frame(sub_notebook2)
+        sub_notebook2.add(videotab3B, text="2D Band Hybridisation")
+        video_container_3B = tk.Frame(videotab3B, bg="black", width=640, height=360)
+        video_container_3B.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
+        video_player_3B = VideoPlayer(video_container_3B, "BandStructure3D.mp4")
+        self.video_players.append(video_player_3B)
+        create_video_controls(videotab3B, video_player_3B)
         tab3c = TabWithMode(sub_notebook2, "Nanoribbon", Nanoribbon, ["m"])
         sub_notebook2.add(tab3c, text="Nanoribbon")
+        videotab3C = ttk.Frame(sub_notebook2)
+        sub_notebook2.add(videotab3C, text="Time Evolution")
+        video_container_3C = tk.Frame(videotab3C, bg="black", width=640, height=360)
+        video_container_3C.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
+        video_player_3C = VideoPlayer(video_container_3C, "TimeEvo2.mp4")
+        self.video_players.append(video_player_3C)
+        create_video_controls(videotab3C, video_player_3C)
 
         # === Gruppe 3: Tests ===
         # group3_frame = ttk.Frame(self.notebook)
@@ -356,7 +344,7 @@ class MainApp:
 
         # === Gruppe 4: (N+1)x(N+1) ===
         group4_frame = ttk.Frame(self.notebook)
-        self.notebook.add(group4_frame, text="(N+1)x(N+1)")
+
         sub_notebook4 = ttk.Notebook(group4_frame)
         sub_notebook4.pack(fill=tk.BOTH, expand=True)
 
@@ -373,6 +361,11 @@ class MainApp:
         sub_notebook4.add(tab13, text="wave_init")
         tab14 = TabWithMode(sub_notebook4, "wave_omega", wave_omega, ["N", "k0"], drawing=False)
         sub_notebook4.add(tab14, text="wave_omega")
+
+        self.notebook.add(welcome_frame, text="Welcome")
+        self.notebook.add(group1_frame, text="Full Dims")
+        self.notebook.add(group4_frame, text="(N+1)x(N+1)")
+        self.notebook.add(group2_frame, text="2-BandModels")
 
     def on_closing(self):
         for player in self.video_players:

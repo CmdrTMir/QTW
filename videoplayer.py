@@ -4,11 +4,15 @@ import vlc
 import tkinter as tk
 
 class VideoPlayer:
-    def __init__(self, container, video_path):
+    def __init__(self, container, video_name):
         self.container = container
 
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        self.video_abs_path = os.path.join(script_dir, video_path)
+        video_rel_path = os.path.join("videos", video_name)
+        video_abs_path = os.path.join(script_dir, video_rel_path)
+
+        print(f"Video-Pfad: {video_abs_path}")
+        print(f"Datei existiert: {os.path.exists(video_abs_path)}")
         # VLC-Instanz erstellen
         try:
             self.vlc_instance = vlc.Instance("--no-xlib", "--vout=direct3d9", "--quiet")
@@ -20,8 +24,9 @@ class VideoPlayer:
             elif sys.platform == "darwin":
                 self.player.set_nsobject(self.container.winfo_id())
 
-            media = self.vlc_instance.media_new(self.video_abs_path)
+            media = self.vlc_instance.media_new(video_abs_path)
             self.player.set_media(media)
+            #self.player.play()
 
         except Exception as e:
             print(f"Fehler beim Initialisieren des Video-Players: {e}")
