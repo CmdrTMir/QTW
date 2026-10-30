@@ -142,15 +142,12 @@ def twoband_2D(ax, write_to_output, params):
     # ---- Variablen ----
     #N = 10 #params.get("N", 10)
     t = params.get("t", 2)
-    #tf = params.get("tf", 100)
+    m_string = params.get("m", 1)
+    m = int(m_string)
     a = 1.0
 
     write_to_output("This is a 10x10 example!")
     # New calculation for H and c's
-    #if int(np.sqrt(N))**2 != N:
-        #write_to_output(f"ERROR: N = {N} isn't a square number. Make sure that n^2 = N.", "#CD2626")
-        #raise ValueError(f"N = {N} ist keine Quadratzahl. Es muss n^2 = N gelten.")
-    #n = int(math.sqrt(N))
 
     # Energie
     k_x_werte = np.linspace(-np.pi/a, np.pi/a, ks)
@@ -162,20 +159,20 @@ def twoband_2D(ax, write_to_output, params):
 
     for k_x in k_x_werte:
         for k_y in k_y_werte:
-            ev_minus = 2 * t - 2 * t * math.sqrt(math.sin(k_x)**2 + math.sin(k_y)**2 + (1 + math.cos(k_x) + math.cos(k_y))**2)
-            ev_plus = 2 * t + 2 * t * math.sqrt(math.sin(k_x)**2 + math.sin(k_y)**2 + (1 + math.cos(k_x) + math.cos(k_y))**2 )
+            ev_minus = 2 * t - 2 * t * math.sqrt(math.sin(k_x)**2 + math.sin(k_y)**2 + (m + math.cos(k_x) + math.cos(k_y))**2)
+            ev_plus = 2 * t + 2 * t * math.sqrt(math.sin(k_x)**2 + math.sin(k_y)**2 + (m + math.cos(k_x) + math.cos(k_y))**2 )
             s_band.append(ev_minus)
             p_band.append(ev_plus)
             dx = math.sin(k_x)
             dy = math.sin(k_y)
-            dz = (1 + math.cos(k_x) + math.cos(k_y))
+            dz = (m + math.cos(k_x) + math.cos(k_y))
             d_vec = -2 * t * np.array([[dx], [dy], [dz]])
             d_vecs.append(d_vec)
 
 
     dim = 2 * N * N
     H = np.zeros((dim, dim), dtype=complex)
-    M  = np.array([[0, 0], [0, 4*t]])
+    M  = np.array([[2*t*(1-m), 0], [0, 2*t*(1+m)]])
     Tx = np.array([[t, 1j*t], [1j*t, -t]])
     Ty = np.array([[t, t], [-t, -t]])
 
@@ -196,7 +193,7 @@ def twoband_2D(ax, write_to_output, params):
                 H[i:i+2, k:k+2] -= Ty.conj().T
 
     write_to_output(f"Hamiltonian Dimension: {H.shape}")
-    write_to_output(f"Ist H hermitesch? {np.allclose(H, H.conj().T)}")
+    write_to_output(f"Is H hermitian? {np.allclose(H, H.conj().T)}")
 
     eigvalues, eigvectors = eigh(H)
     edge_masking = (eigvalues > 0) & (eigvalues < 4 * t)
@@ -226,7 +223,6 @@ def twoband_2D(ax, write_to_output, params):
             phase_time = np.exp(-1j * eigvalues[alpha] * tau / hbar)
             Psi_tau += coefficients_alpha[i] * phase_time * eigvectors[:, alpha]
 
-
         Psi_tau_norm = Psi_tau / np.linalg.norm(Psi_tau)
         Psis.append(Psi_tau_norm)
         P_grid = np.sum(np.abs(Psi_tau_norm.reshape(10, 10, 2))**2, axis=2)
@@ -235,24 +231,35 @@ def twoband_2D(ax, write_to_output, params):
     write_to_output(f"P_grids länge: {len(P_grids)}, \t shape: {P_grids[0].shape}")
 
 
-    ### --- Plot --- stimmt irgendwas noch nicht...
+    ### --- Plot ---
     fig = ax.figure
     fig.clear()
-    ax_dummy = fig.add_subplot(projection='3d')
+    ax_3d = fig.add_subplot(projection='3d')
     KX, KY = np.meshgrid(k_x_werte, k_y_werte, indexing='ij')
     Z = np.sin(KX) * np.cos(KY)
-    ax_dummy.plot_surface(
-        KX,
-        KY,
-        Z,
+
+    sband = s_band.copy()
+    pband = p_band.copy()
+
+    E_minus = np.array(sband).reshape(ks, ks)
+    E_plus  = np.array(pband).reshape(ks, ks)
+    ax_3d.plot_surface(
+        KX, KY, E_minus,
         color='#00AEB3',
-        alpha=1.0
+        alpha=1.0,
     )
-    ax_dummy.set_xlabel(r'$k_x$')
-    ax_dummy.set_ylabel(r'$k_y$')
-    ax_dummy.set_zlabel(r'$E$')
-    ax_dummy.set_title('Dummy Plot')
-    ax_dummy.view_init(elev=15, azim=-50)
+    ax_3d.plot_surface(
+        KX, KY, E_plus,
+        color='#8C368C',
+        alpha=1.0,
+    )
+    ax_3d.set_xlabel(r'$k_x$')
+    ax_3d.set_ylabel(r'$k_y$')
+    ax_3d.set_zlabel(r'$E$')
+    ax_3d.set_title('Energy bands in 2D')
+    ax_3d.view_init(elev=15, azim=-50)
+    #fig.tight_layout(rect=[0, 0, 1, 0.95])
+    fig.savefig('2DEnergybandplot.pdf', dpi=400, bbox_inches='tight', pad_inches=0.3)
 
     plot_combined_visualisations(k_x_werte, k_y_werte, s_band, p_band, d_vecs)
 
