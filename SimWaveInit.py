@@ -21,10 +21,11 @@ def fun_rho_dot(t, y, H, c, c_dag, gamma, N):
 
 def wave_init(ax, write_to_output, params):
     # ---- Variablen ----
+    collage_mode = False
     N = params.get("N", 2)
     t = 0.5 #params.get("t", 1.0)
     gamma = 0.25 #params.get("gamma", 1.0)
-    a = 1       # damit ist die Brillouin-Zone -pi < k0 < pi
+    a = 1
     k0 = params.get("k0", 1.5708) # np.pi / 2
 
     write_to_output(f'The parameters are set to:    t: {t:.2f};  in: wavepacket;  out: {gamma:.2f}')
@@ -65,7 +66,7 @@ def wave_init(ax, write_to_output, params):
     c_dag.append(c0_dagger)
     c_dag.append(cN_dagger)
 
-    # Anfangszustand (Grundzustand) definieren mit Wellenpaket
+    # Anfangszustand (Grundzustand), defined with wave packet
     M = 5  # Anzahl der Sites, die das Paket überdeckt
     sigma_x = (M * a) / 2.0
     psi = np.zeros((N+1), dtype=complex)
@@ -153,14 +154,6 @@ def wave_init(ax, write_to_output, params):
     indices = list(range(0, len(t_all), step))
     if indices[-1] != len(t_all) - 1:
         indices.append(len(t_all) - 1)
-    # t_min = t_all[0]
-    # t_max = t_all[-1]
-    # if t_min == 0:
-    #     t_min = 1e-6
-    # log_times = np.logspace(np.log10(t_min), np.log10(t_max), num_frames)
-    # indices = [0] + [np.argmin(np.abs(np.array(t_all) - t)) for t in log_times] + [len(t_all) - 1]
-    # indices = np.unique(indices)
-    #indices = range(0, len(t_all), step)
     t_selected = [t_all[i] for i in indices]
 
     write_to_output(f'Time steps selected: {len(t_selected)}')
@@ -186,7 +179,7 @@ def wave_init(ax, write_to_output, params):
     def get_occupations(idx):
         return [ew_selected[site][idx] for site in range(N)]
 
-    # Initialer Plot
+    # initial Plot
     idx = 0
     occupations = get_occupations(idx)
     bars = ax.bar(range(1, N+1), occupations, color='#fbb32b')
@@ -196,7 +189,7 @@ def wave_init(ax, write_to_output, params):
     ax.set_ylim(0, y_max)
     ax.set_xticks(range(1, N+1))
 
-    # Update-Funktion für Slider-Bewegung
+    # Update-Function for Slider
     def update(val):
         idx = int(slider.val)
         occupations = get_occupations(idx)
@@ -216,60 +209,44 @@ def wave_init(ax, write_to_output, params):
     # ---------------------------------------------------------
     # Zusätzlicher Plot: Zeitcollage mit ausgewählten Zeitpunkten
     # ---------------------------------------------------------
-    desired_times = [0.0, 2.5, 5.5, 9.4, 12.6, 14.6, 23.4, 28.8]
-    selected_indices = [np.argmin(np.abs(np.asarray(t_all) - t)) for t in desired_times]
-    fig_collage, axes = plt.subplots(
-        2, 4,
-        figsize=(12, 6),
-        sharex=True,
-        sharey=True
-    )
-    axes = axes.flatten()
-    for ax_c, idx in zip(axes, selected_indices):
-        occupations = [ew_listen[site][idx] for site in range(1, N + 1)]
-        ax_c.bar(
-            range(1, N + 1),
-            occupations,
-            color='#fbb32b'
+    if collage_mode:
+        desired_times = [0.0, 2.5, 5.5, 9.4, 12.6, 14.6, 23.4, 28.8]
+        selected_indices = [np.argmin(np.abs(np.asarray(t_all) - t)) for t in desired_times]
+        fig_collage, axes = plt.subplots(
+            2, 4,
+            figsize=(12, 6),
+            sharex=True,
+            sharey=True
         )
-        ax_c.set_title(f'time = {t_all[idx]:.3f}')
-        ax_c.set_ylim(0, y_max)
-        tick_step = 2
-        ticks = list(range(1, N + 1, tick_step))
-        if ticks[-1] != N:
-            ticks.append(N)
-        ax_c.set_xticks(ticks)
-    # Gemeinsame Achsenbeschriftungen
-    fig_collage.supxlabel('Site')
-    fig_collage.supylabel('expectation value')
-    fig_collage.tight_layout()
-    fig_collage.savefig(
-        'wave_init_collage.pdf',
-        bbox_inches='tight'
-    )
-    plt.close(fig_collage)
+        axes = axes.flatten()
+        for ax_c, idx in zip(axes, selected_indices):
+            occupations = [ew_listen[site][idx] for site in range(1, N + 1)]
+            ax_c.bar(
+                range(1, N + 1),
+                occupations,
+                color='#fbb32b'
+            )
+            ax_c.set_title(f'time = {t_all[idx]:.3f}')
+            ax_c.set_ylim(0, y_max)
+            tick_step = 2
+            ticks = list(range(1, N + 1, tick_step))
+            if ticks[-1] != N:
+                ticks.append(N)
+            ax_c.set_xticks(ticks)
+        fig_collage.supxlabel('Site')
+        fig_collage.supylabel('expectation value')
+        fig_collage.tight_layout()
+        fig_collage.savefig(
+            'wave_init_collage.pdf',
+            bbox_inches='tight'
+        )
+        plt.close(fig_collage)
 
 
 
 
-## TODO: - check if I can make the wavepacket symmetrical, such that it really is a complete Gauß.
 ## TODO: - see how I can define tf better.
-## TODO: - make table for k0s to see at which phases the packet really propagates.
 ## TODO: - change L_out such that the packet goes out quicker, maybe in combination with two above
-
-
-    #Alter Plot:
-    # ax.plot(t_all, ew_listen[1], "b-")
-    # ax.plot(t_all, ew_listen[-1], "r--")
-    # ax.axvline(x=tau, color='orange', linestyle='-', linewidth=1.0, alpha=1.0)
-    # ax.grid(True)
-    # ax.set_ylim(0, y_max)
-    # ax.set_xlim(0, t_all[-1] + 1)
-    #
-    # ax.set_xlabel('Zeit')
-    # ax.set_ylabel(r'$\langle n_j \rangle$')
-    # ax.set_title(f'Besetzungszahlen für N={N} Sites')
-    # ax.legend(['Site 1', 'Site N'])
 
 
 

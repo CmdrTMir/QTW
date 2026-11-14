@@ -214,14 +214,12 @@ def chain_to_2D(ax, write_to_output, params):
     y = np.arange(n)
     X, Y = np.meshgrid(x, y)
 
-    # Flachmachen für scatter
     x_flat = X.flatten()
     y_flat = Y.flatten()
     densities = grid.flatten()
     d_min, d_max = np.min(densities), np.max(densities)
     densities_norm = (densities - d_min) / (d_max - d_min)
 
-    # Scatter-Plot
     scatter = ax.scatter(
         x_flat, y_flat,
         s=400,
@@ -233,7 +231,7 @@ def chain_to_2D(ax, write_to_output, params):
         linewidth=0.5
     )
 
-    # --- Site-Nummern (Schlangen-Mapping) ---
+    # Site numbers (Schlangen-Mapping)
     offset = 0.15
     for r in range(n):
         for c in range(n):
@@ -246,7 +244,6 @@ def chain_to_2D(ax, write_to_output, params):
 
     # Colorbar
     fig = ax.figure
-    #fig.colorbar(scatter, ax=ax, label='Expectation value (density)')
     cbar = fig.colorbar(scatter, ax=ax)
     cbar.set_label('Relative steady state density', fontsize=14)
     cbar.ax.tick_params(labelsize=12)

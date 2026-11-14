@@ -19,121 +19,6 @@ plt.rcParams.update({
     'figure.titlesize': 16,     # Figurentitel
 })
 
-def plot_time_evolution_with_slider(write_to_output, ax, ew_listen, t_all, n, N):
-    write_to_output(f"Offene Figuren vor dem Plot: {plt.get_fignums()}", "#fbcf2b")
-    for fig_num in plt.get_fignums():
-        fig = plt.figure(fig_num)
-        if fig is not ax.figure:  # GUI-Figure nicht schließen
-            plt.close(fig)
-
-    num_frames = min(700, max(400, len(t_all) // 4))
-    step = max(1, len(t_all) // num_frames)
-    indices = list(range(0, len(t_all), step))
-    if indices[-1] != len(t_all) - 1:
-        indices.append(len(t_all) - 1)
-    t_selected = [t_all[i] for i in indices]
-    ew_selected = []
-    for site in range(1, N+1):
-        ew_site_selected = [ew_listen[site][i] for i in indices]
-        ew_selected.append(ew_site_selected)
-
-    write_to_output(f"Time evolution: {len(t_all)} frames -> {len(indices)} frames (subsampled)")
-    # vmin/vmax über alle Frames
-    all_densities = []
-    for site_data in ew_selected:
-        all_densities.extend(site_data)
-    vmin = min(all_densities)
-    vmax = max(all_densities)
-
-    # Container
-    class PlotContainer:
-        pass
-    container = PlotContainer()
-    container.t_selected = t_selected
-    container.ew_selected = ew_selected
-    container.n = n
-    container.N = N
-    container.ax = ax
-    container.current_idx = len(indices) - 1
-    container.vmin = vmin
-    container.vmax = vmax
-
-    # --- INITIAL PLOT erstellen (NICHT in einer Funktion!) ---
-    frame_idx = container.current_idx
-    steady_state = [ew_selected[site][frame_idx] for site in range(N)]
-    grid = np.zeros((n, n))
-    for site in range(N):
-        r = site // n
-        c = site % n
-        grid[r, c] = steady_state[site]
-    x = np.arange(n)
-    y = np.arange(n)
-    X, Y = np.meshgrid(x, y)
-    x_flat = X.flatten()
-    y_flat = Y.flatten()
-    densities = grid.flatten()
-    # Scatter erstellen und speichern
-    container.scatter = ax.scatter(
-        x_flat, y_flat,
-        s=400,
-        c=densities,
-        cmap='hot',
-        alpha=0.8,
-        edgecolors='black',
-        linewidth=0.5,
-        vmin=vmin,
-        vmax=vmax
-    )
-    # Site-Nummern (bleiben gleich)
-    offset = 0.15
-    for r in range(n):
-        for c in range(n):
-            site = r * n + c + 1
-            y_pos = n - 1 - r
-            ax.text(c + offset, y_pos + offset, str(site),
-                   ha='left', va='bottom', color='black', fontsize=12)
-    fig = ax.figure
-    container.cbar = fig.colorbar(container.scatter, ax=ax)
-    container.cbar.set_label('Expectation value (density)', fontsize=14)
-    container.cbar.ax.tick_params(labelsize=12)
-
-    container.title = ax.set_title(f'Time evolution (t = {t_selected[frame_idx]:.2f})', fontsize=18)
-    ax.tick_params(axis='both', labelsize=14)
-    ax.set_xticks(np.arange(n))
-    ax.set_xticklabels(np.arange(0, n))
-    ax.set_yticks(np.arange(n))
-    ax.set_yticklabels(np.arange(n-1, -1, -1))
-    ax.grid(True, linestyle='--', alpha=0.3)
-    ax.set_xlim(-0.5, n - 0.5)
-    ax.set_ylim(-0.5, n - 0.5)
-
-    plt.subplots_adjust(bottom=0.15)
-    ax_slider = plt.axes([0.15, 0.05, 0.7, 0.03])
-    container.slider = Slider(
-        ax=ax_slider,
-        label='Time Step',
-        valmin=0,
-        valmax=len(indices) - 1,
-        valinit=container.current_idx,
-        valstep=1
-    )
-    def update(val):
-        frame_idx = int(val)
-        steady_state = [ew_selected[site][frame_idx] for site in range(N)]
-        grid = np.zeros((n, n))
-        for site in range(N):
-            r = site // n
-            c = site % n
-            grid[r, c] = steady_state[site]
-        densities = grid.flatten()
-        container.scatter.set_array(densities)
-        container.title.set_text(f'Time evolution (t = {t_selected[frame_idx]:.2f})')
-        fig.canvas.draw_idle()
-
-    container.slider.on_changed(update)
-    container.slider.set_val(0)
-    return container
-
 # ---- Lindblad-Terme ----
 def fun_rho_dot(t, y, H, c, c_dag, kappa, gamma, N):
     rho = y.reshape(N+1, N+1)
@@ -156,7 +41,7 @@ def dimRed_2D(ax, write_to_output, params):
     # New calculation for H and c's
     if int(np.sqrt(N))**2 != N:
         write_to_output(f"ERROR: N = {N} isn't a square number. Make sure that n^2 = N.", "#CD2626")
-        #raise ValueError(f"N = {N} ist keine Quadratzahl. Es muss n^2 = N gelten.")
+        return
     n = int(math.sqrt(N))
 
     write_to_output(f'The parameters are set to:    in: {kappa:.3f};  out: {gamma:.2f}')
@@ -211,21 +96,6 @@ def dimRed_2D(ax, write_to_output, params):
     start_solve = time.perf_counter()
     # Solver
     ###############################################################
-    #########
-    ######### Stimmt nicht mehr ?????????????????
-    #########
-    ###############################################################
-    #n_ss: kappa is IN
-#     J = (4 * kappa * gamma * t**2) / ((kappa + gamma)*(4 * t**2 + kappa * gamma))
-#     n_1_theo = 1 - J / kappa
-#     n_j_theo = (kappa * (gamma**2 + 4 * t**2)) / ((kappa + gamma)*(4 * t**2 + kappa * gamma))
-#     n_N_theo = J / gamma
-# ###############################################################
-#     write_to_output(f'n_1 analytischer Wert: {n_1_theo:.6f} ')
-#     write_to_output(f'n_j analytischer Wert: {n_j_theo:.6f} ')
-#     write_to_output(f'n_N analytischer Wert: {n_N_theo:.6f} ')
-#
-#     ss_reached = False
     ss_delta = False
 
     eps_delta = 1e-3
@@ -269,7 +139,6 @@ def dimRed_2D(ax, write_to_output, params):
         delta_1 = float('inf')
         delta_N = float('inf')
         delta_j = float('inf')
-        #diff_j = float('inf')
 
         if t0 > min_time:
             last_n_1 = ew_listen[1][-2]
@@ -280,20 +149,14 @@ def dimRed_2D(ax, write_to_output, params):
 
         if N > 2:
             current_n_j = ew_listen[N//2][-1]
-            #diff_j = abs(current_n_j - n_j_theo)
             if t0 > min_time:
                 last_n_j = ew_listen[N//2][-2]
                 delta_j = abs(last_n_j - current_n_j)
-        #else:
-            #diff_j = 0.0
 
         if delta_j < eps_delta and delta_1 < eps_delta and delta_N < eps_delta:
             count += 1
         else:
             count = 0
-
-         #diff_1 = abs(current_n_1 - n_1_theo)
-         #diff_N = abs(current_n_N - n_N_theo)
 
         if count == 5:
             write_to_output(f"Steady State reached as delta at time={t0:.2f}")
@@ -303,13 +166,7 @@ def dimRed_2D(ax, write_to_output, params):
                         + f"delta_N: {delta_N:.10f}")
             ss_delta = True
             break
-
-         #if diff_1 < eps_diff and diff_N < eps_diff and diff_j < eps_diff:
-         #    write_to_output(f"Steady State erreicht durch eps={eps_diff} bei t={t0:.2f}")
-         #    ss_reached = True
-         #    break
-     ###############################################################
-
+    ###############################################################
 
     end_solve = time.perf_counter()
     write_to_output(f'Solving took {(end_solve - start_solve):.4f} s')
@@ -318,6 +175,7 @@ def dimRed_2D(ax, write_to_output, params):
         write_to_output("Increase 'tf' parameter.")
 
     steady_state = [ew_listen[site][-1] for site in range(1, N+1)]
+
     # Plot:
     grid = np.zeros((n, n))
 
@@ -331,26 +189,24 @@ def dimRed_2D(ax, write_to_output, params):
     y = np.arange(n)
     X, Y = np.meshgrid(x, y)
 
-    # Flachmachen für scatter
     x_flat = X.flatten()
     y_flat = Y.flatten()
     densities = grid.flatten()
     d_min, d_max = np.min(densities), np.max(densities)
     densities_norm = (densities - d_min) / (d_max - d_min)
 
-    # Scatter-Plot
     scatter = ax.scatter(
         x_flat, y_flat,
         s=400,
         c=densities_norm,
-        cmap='Greens',
+        cmap='Blues',
         vmin=0, vmax=1,
         alpha=0.8,
         edgecolors='black',
         linewidth=0.5
     )
 
-    # --- Site-Nummern ---
+    # Site numbers
     offset = 0.15
     for r in range(n):
         for c in range(n):
@@ -360,7 +216,6 @@ def dimRed_2D(ax, write_to_output, params):
 
     # Colorbar
     fig = ax.figure
-    #fig.colorbar(scatter, ax=ax, label='Expectation value (density)')
     cbar = fig.colorbar(scatter, ax=ax)
     cbar.set_label('Relative steady state density', fontsize=14)
     cbar.ax.tick_params(labelsize=12)
@@ -377,10 +232,7 @@ def dimRed_2D(ax, write_to_output, params):
 
     #ax.figure.savefig("plot2D.png", dpi=400, bbox_inches="tight")
 
-    # 2. Zeitentwicklung mit Slider (NEU)
-    #fig2, ax2 = plt.subplots()
-    #container = plot_time_evolution_with_slider(write_to_output, ax2, ew_listen, t_all, n, N)
-    #plt.show()
+
 
 
 

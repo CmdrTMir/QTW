@@ -196,7 +196,7 @@ def single_excitation_ss(ax, write_to_output, params):
     ax.bar(range(1, N+1), steady_values)
     ax.set_xticks(range(1, N+1))
     ax.set_xlabel("Site")
-    ax.set_ylabel("Occupation number")
+    ax.set_ylabel("Expectation value")
     ax.set_title("Steady State")
 
 

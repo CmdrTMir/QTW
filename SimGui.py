@@ -15,7 +15,7 @@ from SimSingleExcitation import single_excitation
 from SimDimReduction import dim_reduction
 from SimKette2DPlot import chain_to_2D
 from Sim2D import dimRed_2D
-from Sim2DAni import ani_2D
+#from Sim2DAni import ani_2D
 from SimEigenvals2D import eigenvals_2D
 from Sim1D2band import twoband_1D
 from Sim2D2band import twoband_2D
@@ -278,7 +278,7 @@ class MainApp:
         self.video_container = tk.Frame(welcome_frame, bg="black", width=640, height=360)
         self.video_container.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
         # Player und Buttons in einem Rutsch
-        self.welcome_player = VideoPlayer(self.video_container, "Explain.mp4")
+        self.welcome_player = VideoPlayer(self.video_container, "Combined.mp4")
         self.video_players.append(self.welcome_player)
         create_video_controls(welcome_frame, self.welcome_player)
         self.welcome_player.play()

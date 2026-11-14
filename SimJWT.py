@@ -79,7 +79,7 @@ def create_JWT_T(N, t, d_val, write_to_output):
     # T = np.round(T_raw, 2)
     # T[T < 1e-3] = 0.0
     # print(T)
-    write_to_output("Variable t meaning not tight-binding")
+    write_to_output("Variable t, this is a non tight-binding example.")
     write_to_output(f"T-matrix: \n {T}")
 
 

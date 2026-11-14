@@ -33,6 +33,7 @@ def schrödinger(t, y, H_tb, hbar, sigma_z, k0, a, J):
 
 def wave_omega(ax, write_to_output, params):
     # ---- Variablen ----
+    collage_mode = False
     N = params.get("N", 2)
     J = 0.5 #params.get("t", 1.0)
     a = 1   # damit ist die Brillouin-Zone -pi < k0 < pi
@@ -54,7 +55,7 @@ def wave_omega(ax, write_to_output, params):
         sigma_z = (2 * sigma_x) / v_g
 
     z_puls_on = 2 * sigma_z
-    z_puls_off = 2 * sigma_z * 2 # definitiv aus
+    z_puls_off = 2 * sigma_z * 2
     # tau = wandert durchs Gitter (oder bei v_g=0 Dissipation)
     zf = z_puls_on + z_puls_off * sigma_z + tau
 
@@ -143,14 +144,6 @@ def wave_omega(ax, write_to_output, params):
     indices = list(range(0, len(t_all), step))
     if indices[-1] != len(t_all) - 1:
         indices.append(len(t_all) - 1)
-    # t_min = t_all[0]
-    # t_max = t_all[-1]
-    # if t_min == 0:
-    #     t_min = 1e-6
-    # log_times = np.logspace(np.log10(t_min), np.log10(t_max), num_frames)
-    # indices = [0] + [np.argmin(np.abs(np.array(t_all) - t)) for t in log_times] + [len(t_all) - 1]
-    # indices = np.unique(indices)
-    #indices = range(0, len(t_all), step)
     t_selected = [t_all[i] for i in indices]
 
     write_to_output(f'Time steps selected: {len(t_selected)}')
@@ -176,7 +169,7 @@ def wave_omega(ax, write_to_output, params):
     def get_occupations(idx):
         return [ew_selected[site][idx] for site in range(N)]
 
-    # Initialer Plot
+    # initial Plot
     idx = 0
     occupations = get_occupations(idx)
     bars = ax.bar(range(1, N+1), occupations, color='#fbb32b')
@@ -186,7 +179,7 @@ def wave_omega(ax, write_to_output, params):
     ax.set_ylim(0, y_max)
     ax.set_xticks(range(1, N+1))
 
-    # Update-Funktion für Slider-Bewegung
+    # Update-Function for Slider
     def update(val):
         idx = int(slider.val)
         occupations = get_occupations(idx)
@@ -206,62 +199,39 @@ def wave_omega(ax, write_to_output, params):
     # ---------------------------------------------------------
     # Zusätzlicher Plot: Zeitcollage mit ausgewählten Zeitpunkten
     # ---------------------------------------------------------
-    desired_times = [2.5, 9.0, 15.0, 17.5, 20.0, 24.0, 29.1, 45.0]
-    selected_indices = [np.argmin(np.abs(np.asarray(t_all) - t)) for t in desired_times]
-    fig_collage, axes = plt.subplots(
-        2, 4,
-        figsize=(12, 6),
-        sharex=True,
-        sharey=True
-    )
-    axes = axes.flatten()
-    for ax_c, idx in zip(axes, selected_indices):
-        occupations = [ew_listen[site][idx] for site in range(1, N + 1)]
-        ax_c.bar(
-            range(1, N + 1),
-            occupations,
-            color='#fbb32b'
+    if collage_mode:
+        desired_times = [2.5, 9.0, 15.0, 17.5, 20.0, 24.0, 29.1, 45.0]
+        selected_indices = [np.argmin(np.abs(np.asarray(t_all) - t)) for t in desired_times]
+        fig_collage, axes = plt.subplots(
+            2, 4,
+            figsize=(12, 6),
+            sharex=True,
+            sharey=True
         )
-        ax_c.set_title(f'time = {t_all[idx]:.3f}')
-        ax_c.set_ylim(0, y_max)
-        tick_step = 2
-        ticks = list(range(1, N + 1, tick_step))
-        if ticks[-1] != N:
-            ticks.append(N)
-        ax_c.set_xticks(ticks)
+        axes = axes.flatten()
+        for ax_c, idx in zip(axes, selected_indices):
+            occupations = [ew_listen[site][idx] for site in range(1, N + 1)]
+            ax_c.bar(
+                range(1, N + 1),
+                occupations,
+                color='#fbb32b'
+            )
+            ax_c.set_title(f'time = {t_all[idx]:.3f}')
+            ax_c.set_ylim(0, y_max)
+            tick_step = 2
+            ticks = list(range(1, N + 1, tick_step))
+            if ticks[-1] != N:
+                ticks.append(N)
+            ax_c.set_xticks(ticks)
 
-    # Gemeinsame Achsenbeschriftungen
-    fig_collage.supxlabel('Site')
-    fig_collage.supylabel('expectation value')
-    fig_collage.tight_layout()
-    fig_collage.savefig(
-        'wave_omega_collage.pdf',
-        bbox_inches='tight'
-    )
-    plt.close(fig_collage)
-
-
-
-    #Alter Plot:
-    # max_val = max(max(ew_listen[1]), max(ew_listen[-1]))
-    # if max_val < 0.01:
-    #     y_max = 0.01
-    # else:
-    #     y_max = max_val * 1.1
-    #
-    # ax.plot(t_all, ew_listen[1], "b-")
-    # ax.plot(t_all, ew_listen[-1], "r--")
-    # ax.axvline(x=z_puls_on, color='orange', linestyle='-', linewidth=1.0, alpha=1.0)
-    # ax.axvline(x=z_puls_off, color='orange', linestyle='-', linewidth=1.0, alpha=1.0)
-    # ax.axvline(x=tau, color='orange', linestyle='-', linewidth=1.0, alpha=1.0)
-    # ax.grid(True)
-    # ax.set_ylim(0, y_max)
-    # ax.set_xlim(0, t_all[-1] + 1)
-    #
-    # ax.set_xlabel('Zeit')
-    # ax.set_ylabel(r'$\langle n_j \rangle$')
-    # ax.set_title(f'Besetzungszahlen für N={N} Sites')
-    # ax.legend(['Site 1', 'Site N'])
+        fig_collage.supxlabel('Site')
+        fig_collage.supylabel('expectation value')
+        fig_collage.tight_layout()
+        fig_collage.savefig(
+            'wave_omega_collage.pdf',
+            bbox_inches='tight'
+        )
+        plt.close(fig_collage)
 
 
 

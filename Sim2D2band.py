@@ -7,10 +7,11 @@ import qutip as qt
 import time
 import math
 
+# global variables
 ks = 200
 N = 10
 
-##### --- New Visualisations: #####
+##### --- New Visualisations:
 def plot_combined_visualisations(k_x_werte, k_y_werte, s_band, p_band, d_vecs):
     fig = plt.figure(num="2D Combined visualisations", figsize=(14, 12))
     KX, KY = np.meshgrid(k_x_werte, k_y_werte, indexing='ij')
@@ -89,7 +90,7 @@ def plot_combined_visualisations(k_x_werte, k_y_werte, s_band, p_band, d_vecs):
     ax3.set_zlabel(r'$\hat d_z$')
     ax3.set_title(r'$\hat{\mathbf{d}}(k_x,k_y)$ — Bloch sphere')
     ax3.view_init(elev=15, azim=-50)
-    # gleiche Skalierung der Achsen
+    # same scale (of axes)
     ax3.set_xlim(-1, 1)
     ax3.set_ylim(-1, 1)
     ax3.set_zlim(-1, 1)
@@ -127,18 +128,18 @@ def plot_combined_visualisations(k_x_werte, k_y_werte, s_band, p_band, d_vecs):
     plt.pause(0.001)
 
 ####################################################################################################################
-# Hilfsfunktion: Berechnet den Startindex für die 2x2 Blockmatrix eines Gitterplatzes
+# helper function: calculates the start index for the 2x2 block matrix for one grid position
 def site_idx(m, n):
     return 2 * (m * N + n)
 
 
 def twoband_2D(ax, write_to_output, params):
-    write_to_output(f"Offene Figuren vor dem Plot: {plt.get_fignums()}", "#fbcf2b")
+    write_to_output(f"Open figures before plot: {plt.get_fignums()}", "#fbcf2b")
     for fig_num in plt.get_fignums():
         fig = plt.figure(fig_num)
         if fig is not ax.figure:  # GUI-Figure nicht schließen
             plt.close(fig)
-    write_to_output(f"Offene Figuren nach dem Löschen: {plt.get_fignums()}", "#fbcf2b")
+    write_to_output(f"Open figures after deleting: {plt.get_fignums()}", "#fbcf2b")
     # ---- Variablen ----
     #N = 10 #params.get("N", 10)
     t = params.get("t", 2)
@@ -148,8 +149,7 @@ def twoband_2D(ax, write_to_output, params):
 
     write_to_output("This is a 10x10 example!")
     # New calculation for H and c's
-
-    # Energie
+    # Energy
     k_x_werte = np.linspace(-np.pi/a, np.pi/a, ks)
     k_y_werte = np.linspace(-np.pi/a, np.pi/a, ks)
 
@@ -181,18 +181,18 @@ def twoband_2D(ax, write_to_output, params):
             i = site_idx(m, n)
             # 1. On-site Term (M)
             H[i:i+2, i:i+2] += M
-            # 2. Hopping in x-Richtung (Tx)
+            # 2. Hopping in x-direction (Tx)
             if m + 1 < N: #Nx
                 j = site_idx(m + 1, n)
                 H[j:j+2, i:i+2] -= Tx
                 H[i:i+2, j:j+2] -= Tx.conj().T
-            # 3. Hopping in y-Richtung (Ty)
+            # 3. Hopping in y-direction (Ty)
             if n + 1 < N: #Ny
                 k = site_idx(m, n + 1)
                 H[k:k+2, i:i+2] -= Ty
                 H[i:i+2, k:k+2] -= Ty.conj().T
 
-    write_to_output(f"Hamiltonian Dimension: {H.shape}")
+    write_to_output(f"Hamiltonian dimension: {H.shape}")
     write_to_output(f"Is H hermitian? {np.allclose(H, H.conj().T)}")
 
     eigvalues, eigvectors = eigh(H)
@@ -204,9 +204,9 @@ def twoband_2D(ax, write_to_output, params):
     sigma_E = 0.3 * t
     x0 = 0
     k_alpha = 0
-    # evtl noch ändern und in die GUI als Eingabe?
-    T_max = 50.0 # Etwas mehr als eine Umrundung
-    N_frames = 200 # Auflösung der Animation
+    ### --- for unfished animation. Animation is done with Manim, see video tab.
+    T_max = 50.0
+    N_frames = 200
     time_steps = np.linspace(0, T_max, N_frames)
     Psis = []
     P_grids = []
@@ -228,8 +228,8 @@ def twoband_2D(ax, write_to_output, params):
         P_grid = np.sum(np.abs(Psi_tau_norm.reshape(10, 10, 2))**2, axis=2)
         P_grids.append(P_grid)
 
-    write_to_output(f"P_grids länge: {len(P_grids)}, \t shape: {P_grids[0].shape}")
-
+    write_to_output(f"P_grids length: {len(P_grids)}, \t shape: {P_grids[0].shape}")
+    ### ---|
 
     ### --- Plot ---
     fig = ax.figure
@@ -259,7 +259,7 @@ def twoband_2D(ax, write_to_output, params):
     ax_3d.set_title('Energy bands in 2D')
     ax_3d.view_init(elev=15, azim=-50)
     #fig.tight_layout(rect=[0, 0, 1, 0.95])
-    fig.savefig('2DEnergybandplot.pdf', dpi=400, bbox_inches='tight', pad_inches=0.3)
+    #fig.savefig('2DEnergybandplot.pdf', dpi=400, bbox_inches='tight', pad_inches=0.3)
 
     plot_combined_visualisations(k_x_werte, k_y_werte, s_band, p_band, d_vecs)
 

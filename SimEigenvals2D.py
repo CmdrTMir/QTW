@@ -30,7 +30,7 @@ def eigenvals_2D(ax1, ax2, write_to_output, params):
     # New calculation for H and c's
     if int(np.sqrt(N))**2 != N:
         write_to_output(f"ERROR: N = {N} isn't a square number. Make sure that n^2 = N.", "#CD2626")
-        #raise ValueError(f"N = {N} ist keine Quadratzahl. Es muss n^2 = N gelten.")
+        return
     n = int(math.sqrt(N))
 
     write_to_output(f'The parameters are set to:    in: {kappa:.3f};  out: {gamma:.2f}')
@@ -106,10 +106,9 @@ def eigenvals_2D(ax1, ax2, write_to_output, params):
     # ========== Differenz als Text ausgeben ==========
     write_to_output("blue = numerical \t red = analytical")
     diff = eig_num_sorted - eig_ana_sorted
-    # write_to_output("Differenz (Numerisch - Analytisch) für jeden Index:")
+    # write_to_output("Difference (Numerical - Analytical) for each index:")
     # for i, d in enumerate(diff):
     #     write_to_output(f"Index {i:3d}: {d:.2e}")
-    # Zusätzlich max. Abweichung
     max_diff = np.max(np.abs(diff))
     write_to_output(f"Maximal absolute difference: {max_diff:.2e}")
 

@@ -10,14 +10,9 @@ import time
 import math
 import pdb
 
-##### --- helper function: #####
+# --- helper function:
 def bloch_sphere_coordinates(state):
-    """
-    Convert a 2-component spinor to Bloch sphere coordinates.
-    Returns (theta, phi) in radians.
-    """
     alpha, beta = state[0], state[1]
-    # Normalize (just in case)
     norm = np.sqrt(np.abs(alpha)**2 + np.abs(beta)**2)
     alpha = alpha / norm
     beta = beta / norm
@@ -27,7 +22,7 @@ def bloch_sphere_coordinates(state):
     phi = np.arctan2(np.sin(phi), np.cos(phi))
     return theta, phi
 
-##### --- New Visualisations: #####
+##### --- New Visualisations:
 def plot_combined_visualisations(k_werte, s_band, p_band, V_k_abs, h_k, t_1, t_2, p_band_ref, s_band_ref,
                                  dx_list, dy_list, dz_list,
                                  u_plus_list, u_minus_list, d_hat_list, param_text):
@@ -96,6 +91,7 @@ def plot_combined_visualisations(k_werte, s_band, p_band, V_k_abs, h_k, t_1, t_2
 
     ## plot hier h(k) in komplexer ebene...
     # ---- 4. d_hat-Pfad auf der Bloch-Kugel (unten rechts) ----
+
     #ax4 = fig.add_subplot(2, 2, 4, projection='3d')
     # Bloch-sphere
     #ax4.plot_surface(bloch_x, bloch_y, bloch_z, color='lightgray', alpha=0.2, edgecolor='none')
@@ -112,6 +108,7 @@ def plot_combined_visualisations(k_werte, s_band, p_band, V_k_abs, h_k, t_1, t_2
     # ax4.set_zlabel('$\\hat{d}_z$')
     # ax4.set_title('Path of $\\hat{\\mathbf{d}}(k)$ on the Bloch Sphere')
     # ax4.legend()
+
     # Trajektorie
     ax4 = fig.add_subplot(2, 2, 4)
     h_k = np.array(h_k)
@@ -145,16 +142,18 @@ def plot_combined_visualisations(k_werte, s_band, p_band, V_k_abs, h_k, t_1, t_2
     fig.canvas.manager.set_window_title('Combined visualisations')
     plt.draw()
     plt.pause(0.001)
-    fig.savefig("combined_vis.png", dpi=400)
+    #fig.savefig("combined_vis.png", dpi=400)
 
 #####################################################################################################################
+
 def twoband_1D(ax, write_to_output, params):
-    write_to_output(f"Offene Figuren vor dem Plot: {plt.get_fignums()}", "#fbcf2b")
+    write_to_output(f"Open figures before plot: {plt.get_fignums()}", "#fbcf2b")
     for fig_num in plt.get_fignums():
         fig = plt.figure(fig_num)
         if fig is not ax.figure:  # GUI-Figure nicht schließen
             plt.close(fig)
-    write_to_output(f"Offene Figuren nach dem Löschen: {plt.get_fignums()}", "#fbcf2b")
+    write_to_output(f"Open figures after deleting: {plt.get_fignums()}", "#fbcf2b")
+
     # ---- variables ----
     t_ss = params.get("t_ss", 1.0)
     t_pp = params.get("t_pp", 1.0)
@@ -201,12 +200,14 @@ def twoband_1D(ax, write_to_output, params):
         if not np.allclose(H_k, H_k.conj().T, atol=1e-12):
             write_to_output(f"Error: H(k) is NOT Hermitian at k={k:.3f}!\n"
                                  f"H = {H_k}\nH^dag = {H_k.conj().T}")
+            return
         # --- check off-diagonal matches the expected h_sp(k) ---
         # H_01(k) = -(t_sp * e^{ika} + conj(t_ps) * e^{-ika})
         h_sp = -(t_sp * np.exp(1j * k * a) + np.conj(t_ps) * np.exp(-1j * k * a))
         if not np.allclose(H_k[0, 1], h_sp, atol=1e-12):
             write_to_output(f"Error: off-diagonal mismatch at k={k:.3f}!\n"
                                  f"Computed: {H_k[0, 1]}\nExpected: {h_sp}")
+            return
 
         d0 = (e_s + e_p) / 2 - (t_ss + t_pp) * math.cos(k*a)
         dz = (e_s - e_p) / 2 - (t_ss - t_pp) * math.cos(k*a)
@@ -229,15 +230,15 @@ def twoband_1D(ax, write_to_output, params):
             d_hat = np.array([np.real(h_sp), -np.imag(h_sp), dz]) / d_mag
             d_hat_list.append(d_hat)
         # Strategy: Use the formula that DOES NOT divide by zero
-        # Formula A works unless dz ≈ -|d|
-        # Formula B works unless dz ≈ +|d|
+        # Formula A works unless dz = -|d|
+        # Formula B works unless dz = +|d|
         if abs(d_mag + dz) > 1e-12:  # Safe to use Formula A
             denom = np.sqrt(2 * d_mag * (d_mag + dz))
             u_plus = np.array([d_mag + dz, np.conj(h_sp)]) / denom
             u_minus = np.array([-h_sp, d_mag + dz]) / denom
             evs_plus.append(u_plus)
             evs_minus.append(u_minus)
-        else:  # Use Formula B (dz ≈ -|d|)
+        else:  # Use Formula B (dz = -|d|)
             denom = np.sqrt(2 * d_mag * (d_mag - dz))
             u_plus = np.array([np.conj(h_sp), d_mag - dz]) / denom
             u_minus = np.array([d_mag - dz, -np.conj(h_sp)]) / denom
@@ -266,13 +267,13 @@ def twoband_1D(ax, write_to_output, params):
 
     ### --- Plot ---
     fig = ax.figure
-    ax.plot(k_werte, p_band, label='(p)-band', color='#8C368C')
-    ax.plot(k_werte, s_band, label='(s)-band', color='#00AEB3')
-    ax.plot(k_werte, V_k_abs, label=r'$|V(k)|$', color='#42994B')
+    ax.plot(k_werte, p_band, color='#5844CE')
+    ax.plot(k_werte, s_band, color='#5844CE')
     #ax.axhline(y=e_s, color='orange', linestyle=':', linewidth=1.0, alpha=0.7)
     #ax.axhline(y=e_p, color='orange', linestyle=':', linewidth=1.0, alpha=0.7)
-    ax.plot(k_werte, p_band_ref, color='#8C368C', linestyle='--', linewidth=0.8, alpha=0.5)
-    ax.plot(k_werte, s_band_ref, color='#00AEB3', linestyle='--', linewidth=0.8, alpha=0.5)
+    ax.plot(k_werte, V_k_abs, label=r'$|h_{sp}(k)|$', color='#42994B', linestyle='-.', linewidth=0.9, alpha=0.7)
+    ax.plot(k_werte, p_band_ref, color='#8C368C', linestyle='--', linewidth=0.9, alpha=0.7)
+    ax.plot(k_werte, s_band_ref, color='#00AEB3', linestyle='--', linewidth=0.9, alpha=0.7)
     ax.axhline(y=0.0, color='gray', linestyle='-', linewidth=1.0)
     ax.axvline(x=0.0, color='gray', linestyle='-', linewidth=1.0)
 
@@ -280,23 +281,25 @@ def twoband_1D(ax, write_to_output, params):
         ax.fill_between(k_werte, max(s_band), min(p_band), color='gray', alpha=0.2, label='band gap')
         #ax.vlines(x=k_min, ymin=s_band[idx_min], ymax=p_band[idx_min], color='black', linestyle='--', linewidth=1)
         #ax.vlines(x=-k_min, ymin=s_band[idx_min], ymax=p_band[idx_min], color='black', linestyle='--', linewidth=1)
-        write_to_output(f"Minimale Bandlücke: {min_gap:.6f} bei k = {k_min:.4f}")
+        write_to_output(f"minimal band gap: {min_gap:.6f} at k = {k_min:.4f}")
 
     ax.set_xlabel(r'$k$ (wave number)', fontsize=12)
     ax.set_ylabel(r'$E(k)$', fontsize=12)
-    param_text = (
-        f"t_ss = {t_ss:.2f}\n"
-        f"t_pp = {t_pp:.2f}\n"
-        f"t_sp: r={r_tsp:.2f}\n"
-        f"        θ={t_tsp:.2f}\n"
-        f"t_ps: r={r_tps:.2f}\n"
-        f"        θ={t_tps:.2f}\n"
-        f"e_s = {e_s:.2f}\n"
-        f"e_p = {e_p:.2f}"
-    )
-    dummy_line = ax.plot([], [], ' ', label=param_text)[0]
-    ax.legend(loc='center left', bbox_to_anchor=(1.045, 0.5))
-    fig.savefig("plot.png", dpi=400, bbox_inches="tight")
+    param_text = ""
+    # param_text = (
+    #     f"t_ss = {t_ss:.2f}\n"
+    #     f"t_pp = {t_pp:.2f}\n"
+    #     f"t_sp: r={r_tsp:.2f}\n"
+    #     f"        θ={t_tsp:.2f}\n"
+    #     f"t_ps: r={r_tps:.2f}\n"
+    #     f"        θ={t_tps:.2f}\n"
+    #     f"e_s = {e_s:.2f}\n"
+    #     f"e_p = {e_p:.2f}"
+    # )
+    # dummy_line = ax.plot([], [], ' ', label=param_text)[0]
+    # ax.legend(loc='center left', bbox_to_anchor=(1.045, 0.5))
+    ax.legend()
+    #fig.savefig("plot.png", dpi=400, bbox_inches="tight")
 
     # execute new plots:
     plot_combined_visualisations(k_werte, s_band, p_band, V_k_abs, h_k, t_1, t_2, p_band_ref, s_band_ref,
@@ -304,18 +307,6 @@ def twoband_1D(ax, write_to_output, params):
                                  evs_plus, evs_minus, d_hat_list, param_text)
     plt.pause(0.1)
 
-
-    #Code-Schrottplatz:
-    #H_00 = e_s + 2 * t_ss * math.cos(k*a)
-    #H_01 = t_ps * math.e**(-1j*k*a) - t_sp * math.e**(1j*k*a)
-    #H_10 = t_sp * math.e**(-1j*k*a) - t_ps * math.e**(1j*k*a)
-    #H_11 = e_p + 2 * t_pp * math.cos(k*a)
-    #H_k = np.array([[H_00, H_01], [H_10, H_11]])
-    #write_to_output("Eigenvectors: ")
-    #write_to_output("s s-Anteil: black --")
-    #write_to_output("s p-Anteil: black --")
-    #write_to_output("p s-Anteil: yellow :")
-    #write_to_output("p p-Anteil: yellow :")
 
 
 
