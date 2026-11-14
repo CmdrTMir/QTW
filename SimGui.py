@@ -15,7 +15,6 @@ from SimSingleExcitation import single_excitation
 from SimDimReduction import dim_reduction
 from SimKette2DPlot import chain_to_2D
 from Sim2D import dimRed_2D
-#from Sim2DAni import ani_2D
 from SimEigenvals2D import eigenvals_2D
 from Sim1D2band import twoband_1D
 from Sim2D2band import twoband_2D
@@ -50,7 +49,7 @@ class TabWithMode(ttk.Frame):
 
         if param_list:
             # Parameter-Frame
-            param_frame = tk.Frame(self)#, bg="#FAF0E6") # Leder   bg="#FDF5E6" -- Altweiß
+            param_frame = tk.Frame(self)
             param_frame.pack(fill=tk.X, padx=5, pady=5)
             row1 = tk.Frame(param_frame)
             row1.pack(fill=tk.X, pady=2)
@@ -176,7 +175,7 @@ class TabWithMode(ttk.Frame):
             if hasattr(self, 'ep_var'): self.param_vars['e_p'] = self.ep_var
             if hasattr(self, 'm_var'): self.param_vars['m'] = self.m_var
 
-        # Buttons zum Ausführen
+        # Buttons
         button_frame = tk.Frame(self)
         button_frame.pack(pady=5)
         self.run_button = tk.Button(button_frame, text="Run Script", font=("Arial", 12, "bold"), fg="#000080", command=self.execute_script)
@@ -194,7 +193,7 @@ class TabWithMode(ttk.Frame):
         self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
         self.show_empty_plot()
-        # Initialen leeren Text-Bereich anzeigen
+        # inital empty text box
         self.output_text = tk.Text(self, height=15, wrap=tk.WORD)
         self.output_text.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
@@ -245,22 +244,7 @@ class TabWithMode(ttk.Frame):
             self.script_func(self.ax, self.write_to_output, params)
             self.canvas.draw()
 
-# ------------------------------------------------------------
-def script1(ax):
-    x = np.linspace(0, 10, 100)
-    ax.plot(x, np.sin(x), label="Skript 1: Sinus")
-    ax.legend()
-# ------------------------------------------------------------
 class MainApp:
-    # def play_video(self):
-    #     if hasattr(self, 'player') and self.player is not None:
-    #         self.player.play()
-    # def stop_video(self):
-    #     if hasattr(self, 'player') and self.player is not None:
-    #         self.player.stop()
-    # def pause_video(self):
-    #     if hasattr(self, 'player') and self.player is not None:
-    #         self.player.pause()
     def __init__(self, root):
         self.root = root
         self.root.title("GUI for multiple tasks")
@@ -274,10 +258,10 @@ class MainApp:
         # === Gruppe 0: Welcome / Video ===
         welcome_frame = ttk.Frame(self.notebook)
 
-        # Video-Container erstellen
+        # Video-Container
         self.video_container = tk.Frame(welcome_frame, bg="black", width=640, height=360)
         self.video_container.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
-        # Player und Buttons in einem Rutsch
+        # Player and Buttons
         self.welcome_player = VideoPlayer(self.video_container, "Combined.mp4")
         self.video_players.append(self.welcome_player)
         create_video_controls(welcome_frame, self.welcome_player)
@@ -332,23 +316,13 @@ class MainApp:
         self.video_players.append(video_player_3C)
         create_video_controls(videotab3C, video_player_3C)
 
-        # === Gruppe 3: Tests ===
-        # group3_frame = ttk.Frame(self.notebook)
-        # self.notebook.add(group3_frame, text="Tests")
-        # sub_notebook3 = ttk.Notebook(group3_frame)
-        # sub_notebook3.pack(fill=tk.BOTH, expand=True)
-        #
-        # # Tabs in Gruppe 3
-        # tab5 = TabWithMode(sub_notebook3, "Sinus", script1, None)
-        # sub_notebook3.add(tab5, text="Sinus")
-
         # === Gruppe 4: (N+1)x(N+1) ===
         group4_frame = ttk.Frame(self.notebook)
 
         sub_notebook4 = ttk.Notebook(group4_frame)
         sub_notebook4.pack(fill=tk.BOTH, expand=True)
 
-        #Tabs in Gruppe 4
+        # Tabs in Gruppe 4
         tab8 = TabWithMode(sub_notebook4, "DimReduction", dim_reduction, ["N"])
         sub_notebook4.add(tab8, text="DimReduction")
         tab9 = TabWithMode(sub_notebook4, "Chain-2D", chain_to_2D, ["N"])
@@ -378,10 +352,9 @@ class MainApp:
 if __name__ == "__main__":
     root = tk.Tk()
 
-    # ---- Tkinter globale Schriftgröße ----
+    # global font
     default_font = font.nametofont("TkDefaultFont")
     default_font.configure(size=12)
-    # Optional: Auch für Text-Widgets
     text_font = font.nametofont("TkTextFont")
     text_font.configure(size=12)
 
