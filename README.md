@@ -43,7 +43,7 @@ Steps for the virtual environment:
 3. Execute py -3.13 -m venv .venv
 4. Execute .venv\Scripts\activate
 5. Execute pip install matplotlib==3.10.0 
-6. Install other dependencies (e.g. NumPy, SciPy)
+6. Install other dependencies (e.g. NumPy, SciPy, python-vlc)
 7. Start the GUI with python SimGUI.py
 8. After finishing work: deactivate
 
